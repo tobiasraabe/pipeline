@@ -2,15 +2,15 @@
 Getting Started
 ===============
 
-To get started with **pipeline**, we will take a look at a demo project over at `OpenSourceEconomics <https://github.com/OpenSourceEconomics/pipeline-demo-project>`_.
-
-
+To get started with **pipeline**, we will take a look at a demo project over at
+`OpenSourceEconomics <https://github.com/OpenSourceEconomics/pipeline-demo-project>`_.
 
 
 .pipeline.yaml
 --------------
 
-At the top of the project lies a ``.pipeline.yaml``. If the file is empty, it simply indicates the top of the project. To inspect the default configuration, type
+At the top of the project lies a ``.pipeline.yaml``. If the file is empty, it simply
+indicates the top of the project. To inspect the default configuration, type
 
 .. code-block:: bash
 

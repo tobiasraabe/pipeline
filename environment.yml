@@ -21,6 +21,7 @@ dependencies:
   - restructuredtext_lint
   - rpy2
   - sphinx
+  - sphinx_rtd_theme
   - statsmodels
   - tqdm
   - pip:

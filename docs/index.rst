@@ -2,12 +2,12 @@ Welcome to pipeline's documentation!
 ====================================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
 
    installation
    getting-started
-
+   user-guides/index
+   templates/index
 
 
 Indices and tables
