@@ -1,0 +1,47 @@
+{% set data = load_setup_py_data() %}
+
+package:
+  name: pipeline
+  version: {{ data.get('version') }}
+
+source:
+  # git_url is nice in that it won't capture devenv stuff.  However, it only captures
+  # committed code, so pay attention.
+  path: ../
+
+build:
+  noarch: python
+  number: 0
+  entry_points:
+    - pipeline = pipeline.cli:cli
+
+requirements:
+  build:
+    - python
+    - setuptools
+  host:
+    - python >=3.6,<3.8
+
+  run:
+    - python >=3.6,<3.8
+    - click
+    - jinja2
+    - pandas
+    - pyyaml
+    - matplotlib
+    - networkx
+    - statsmodels
+    - tqdm
+
+test:
+  source_files:
+    - tox.ini
+  commands:
+    - pipeline --version
+    - pipeline --help
+
+about:
+  home: https://github.com/OpenSourceEconomics/pipeline
+  license: BSD
+  license_file: LICENSE
+  summary: Build system for the scientific publication process.

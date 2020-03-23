@@ -1,0 +1,30 @@
+name: pipeline
+channels:
+  - defaults
+  - conda-forge
+  - r
+dependencies:
+  - python=3.7
+  - pip
+  - anaconda-client
+  - conda-build
+  - conda-verify
+  - click
+  - jinja2
+  - joblib
+  - jupyterlab
+  - matplotlib
+  - networkx
+  - pandas
+  - pre-commit
+  - pyyaml
+  - restructuredtext_lint
+  - rpy2
+  - sphinx
+  - statsmodels
+  - tqdm
+  - pip:
+    - stargazer
+  - r-irkernel
+  - r-stargazer
+  - r-tidyverse
