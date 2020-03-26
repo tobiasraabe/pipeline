@@ -17,9 +17,10 @@ def save_model(model):
 
 
 def main():
-    df = load_data()
+    df = load_data("{{ depends_on }}")
     model = fit_model(df)
     save_model(model)
 
 
-{% include 'ifmain.py' %}
+if __name__ == "__main__":
+    main()

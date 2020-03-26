@@ -104,9 +104,10 @@ To get started with **pipeline**, please visit the `documentation
 Todo
 ----
 
-- Extend existing function calls in templates and introduce general arguments which work
-  for R and Python.
-- Write documentation
-- Write more tests
 - **pipeline** is currently a working title. Please reach out to me if you have a
   suggestion for a better title.
+- IMplement parallel execution
+- Write documentation
+- Write more tests
+- Extend existing function calls in templates and introduce general arguments which work
+  for R and Python.

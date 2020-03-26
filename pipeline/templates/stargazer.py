@@ -1,35 +1,32 @@
 import joblib
-
+from pathlib import Path
 from stargazer.stargazer import Stargazer
 
 
 def load_model(path):
     model = joblib.load(path)
-
     return model
 
 
-def create_table(models):
+def create_table(models, path):
+    path = Path(path)
     stargazer = Stargazer(models)
 
-    {% if produces.endswith(".tex") %}
-    table = stargazer.render_latex()
-    {% elif produces.endswith(".html") or not Path(produces).suffix %}
-    table = stargazer.render_html()
-    {% else %}
-    raise NotImplementedError
-    {% endif %}
+    if path.suffix == ".tex":
+        table = stargazer.render_latex()
+    elif path.suffix == ".html":
+        table = stargazer.render_html()
+    else:
+        raise NotImplementedError
 
-    with open("{{ produces }}", "w") as file:
+    with open(path, "w") as file:
         file.write(table)
 
 
 def main():
-    models = []
-    for path in {{ ensure_list(depends_on) }}:
-        model = load_model(path)
-        models.append(model)
+    models = [load_model(path) for path in {{ ensure_list(depends_on) }}]
+    create_table(models, "{{ produces }}")
 
-    create_table(models)
 
-{% include 'ifmain.py' %}
+if __name__ == "__main__":
+    main()

@@ -17,6 +17,7 @@ dependencies:
   - networkx
   - pandas
   - pre-commit
+  - pytest
   - pyyaml
   - restructuredtext_lint
   - rpy2

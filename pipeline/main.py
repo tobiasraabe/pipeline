@@ -32,7 +32,7 @@ def build_project(config):
     dag = create_dag(dag_dict)
 
     draw_dag(dag, config)
-    execute_dag(dag, tasks, env, config)
+    execute_dag_serially(dag, tasks, env, config)
 
     return tasks, dag
 
@@ -54,7 +54,7 @@ def create_dag_dict(tasks):
     return dag_dict
 
 
-def execute_dag(dag, tasks, env, config):
+def execute_dag_serially(dag, tasks, env, config):
     """Naive serial scheduler for our tasks."""
     len_task_names = list(map(len, tasks.keys()))
     prevent_task_description_from_moving = max(len_task_names) if len_task_names else 0
