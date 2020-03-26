@@ -108,8 +108,6 @@ Todo
   suggestion for a better title.
 - IMplement parallel execution
 - Write documentation
-- List current limitations (no robust standard errors, logit cannot be tabularized in
-  python)
 - Write more tests
 - Extend existing function calls in templates and introduce general arguments which work
   for R and Python.
