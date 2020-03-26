@@ -3,8 +3,18 @@ Templates
 =========
 
 **pipeline** comes with some pre-defined templates for common tasks in a scientific
-project. Check the templates to see what options are available and what internal code is
-executed.
+project. Check out the templates to see what options are available and what internal
+code is executed.
+
+Most templates come with a set of general parameters which work for all backends and
+template-specific parameters.
+
+If you want to learn about Jinja2 templates in general, see
+
+- `Jinja2's documentation <http://jinja.palletsprojects.com/en/2.11.x/>`_.
+- this `primer on Jinja templating
+  <https://realpython.com/primer-on-jinja-templating/>`_.
+
 
 .. toctree::
    :maxdepth: 1

@@ -26,10 +26,10 @@ requirements:
     - python >=3.6,<3.8
     - click
     - jinja2
-    - pandas
-    - pyyaml
     - matplotlib
     - networkx
+    - pandas >= 0.0.24
+    - pyyaml
     - statsmodels
     - tqdm
 

@@ -1,18 +1,20 @@
-def load_data():
-    import pandas as pd
+from pathlib import Path
+import pandas as pd
 
-    {% if depends_on.endswith(".feather") %}
-    df = pd.read_feather("{{ depends_on }}")
-    {% elif depends_on.endswith(".dta") %}
-    df = pd.read_stata("{{ depends_on }}")
-    {% elif depends_on.endswith(".csv") or not Path(depends_on).suffix %}
-    df = pd.read_csv("{{ depends_on }}")
-    {% elif depends_on.endswith(".pkl") or depends_on.endswith(".pickle") %}
-    df = pd.read_pickle("{{ depends_on }}")
-    {% elif depends_on.endswith(".sav") %}
-    df = pd.read_spss("{{ depends_on }}")
-    {% else %}
-    raise NotImplementedError
-    {% endif %}
+
+def load_data(path):
+    path = Path(path)
+    if path.suffix == ".feather":
+        df = pd.read_feather(path)
+    elif path.suffix == ".dta":
+        df = pd.read_stata(path)
+    elif path.suffix == ".csv":
+        df = pd.read_csv(path)
+    elif path.suffix == ".pkl":
+        df = pd.read_pickle(path)
+    elif path.suffix == ".sav":
+        df = pd.read_spss(path)
+    else:
+        raise NotImplementedError
 
     return df

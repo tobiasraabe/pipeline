@@ -1,14 +1,15 @@
-suppressMessages(library(tidyverse))
+suppressMessages(library(readr))
+library(tools)
 
 
-load_data <- function(){
-    {% if depends_on.endswith(".feather") %}
-    df <- read_feather("{{ depends_on }}")
-    {% elif depends_on.endswith(".csv") or not Path(depends_on).suffix %}
-    df <- read_csv("{{ depends_on }}")
-    {% else %}
-    stop("NotImplementedError")
-    {% endif %}
+load_data <- function(path){
+    if (file_ext(path) == "feather") {
+        df <- read_feather(path)
+    } else if (file_ext(path) %in% c("csv", "")) {
+        df <- read_csv(path)
+    } else {
+        stop("NotImplementedError")
+    }
 
     return(df)
 }

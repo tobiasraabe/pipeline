@@ -46,10 +46,10 @@ def _collect_missing_templates(tasks, custom, internal):
             path = (Path(task_info["config"]).parent / task_info["template"]).as_posix()
             missing_templates[task_info["template"]] = path
 
-    return FileLoader(missing_templates.values()), missing_templates
+    return _FileLoader(missing_templates.values()), missing_templates
 
 
-class FileLoader(jinja2.BaseLoader):
+class _FileLoader(jinja2.BaseLoader):
     """This loader allows to load single files.
 
     Why do I even need to program this?
