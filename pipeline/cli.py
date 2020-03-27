@@ -38,10 +38,12 @@ def collect(ctx, config, tasks, templates):
 @cli.command()
 @click.pass_context
 @click.option("--debug", is_flag=True)
-def build(ctx, debug):
+@click.option("-n", "--n-jobs", default=1, type=int, help="Number of parallel jobs.")
+def build(ctx, debug, n_jobs):
     """Build the project."""
     click.echo("### Build Project")
     ctx.obj["config"]["is_debug"] = debug
+    ctx.obj["config"]["n_jobs"] = n_jobs
     build_project(ctx.obj["config"])
     click.echo("### Finished")
 

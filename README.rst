@@ -111,3 +111,5 @@ Todo
 - Write more tests
 - Extend existing function calls in templates and introduce general arguments which work
   for R and Python.
+- User-defined global variables for Jinja2 templates.
+- Save tasks in dag as node attributes.
