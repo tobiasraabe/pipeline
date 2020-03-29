@@ -25,7 +25,7 @@ How does **pipeline** achieve this goal?
 1. **pipeline** does not bother you with declaring dependencies and targets of your
    tasks. It will handle both while you only need to connect the tasks. Outputs are
    hidden from you by default so that you are not bothered with intermediate results. If
-   you want have access to the output, simply assign a path.
+   you want access the outputs, simply assign explicit output path.
 
 2. **pipeline** uses both, R and Python, as backends. Users will experience the best of
    both worlds. Currently, R's ``stargazer`` package is unparalleled in its ability to
@@ -42,6 +42,7 @@ Other useful features!
 
 - Use the ``--debug`` flag to enter the post-mortem debugger if your build fails.
 - Tasks are not re-run unless anything related to the task has changed.
+- Parallel execution.
 
 
 Installation
@@ -91,23 +92,23 @@ After you have defined some tasks, hit
 
     pipeline build
 
-to execute the tasks.
+to execute the tasks. If you want to enter the debugger if a task raises an exception,
+use
+
+.. code-block:: bash
+
+    pipeline build --debug
+
+For parallel tasks, hit
+
+.. code-block:: bash
+
+    pipeline build -n/--n-jobs <number-of-parallel-processes>
 
 
 Getting Started
 ---------------
 
 To get started with **pipeline**, please visit the `documentation
-<https://pipeline-wp.readthedocs.io/>`_.
-
-
-Todo
-----
-
-- **pipeline** is currently a working title. Please reach out to me if you have a
-  suggestion for a better title.
-- IMplement parallel execution
-- Write documentation
-- Write more tests
-- Extend existing function calls in templates and introduce general arguments which work
-  for R and Python.
+<https://pipeline-wp.readthedocs.io/>`_ or the `sample project
+<https://github.com/OpenSourceEconomics/pipeline-demo-project>`_

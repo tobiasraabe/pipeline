@@ -1,26 +1,16 @@
-import pdb
-import sys
 from pathlib import Path
 
 import networkx as nx
-from tqdm import tqdm
 
 from pipeline.dag import create_dag
 from pipeline.dag import draw_dag
+from pipeline.execution import execute_dag_parallelly
+from pipeline.execution import execute_dag_serially
 from pipeline.hashing import compare_hashes_of_task
-from pipeline.hashing import save_hash_of_task_target
 from pipeline.shared import ensure_list
 from pipeline.tasks import process_tasks
 from pipeline.tasks import replace_missing_templates_with_correct_paths
 from pipeline.templates import collect_templates
-
-try:
-    from rpy2 import robjects
-except ImportError:
-    IS_R_INSTALLED = False
-    robjects = None
-else:
-    IS_R_INSTALLED = True
 
 
 def build_project(config):
@@ -28,16 +18,22 @@ def build_project(config):
     env, missing_templates = collect_templates(config["custom_templates"], tasks)
     tasks = replace_missing_templates_with_correct_paths(tasks, missing_templates)
 
-    dag_dict = create_dag_dict(tasks)
+    dag_dict = _create_dag_dict(tasks)
     dag = create_dag(dag_dict)
 
     draw_dag(dag, config)
-    execute_dag_serially(dag, tasks, env, config)
+
+    tasks = _mark_which_tasks_need_to_be_executed(tasks, dag, env, config)
+
+    if config["n_jobs"] == 1:
+        execute_dag_serially(dag, tasks, env, config)
+    else:
+        execute_dag_parallelly(dag, tasks, env, config)
 
     return tasks, dag
 
 
-def create_dag_dict(tasks):
+def _create_dag_dict(tasks):
     dag_dict = {}
     for id_, task_info in tasks.items():
         # Add the task to the graph as a node.
@@ -54,26 +50,25 @@ def create_dag_dict(tasks):
     return dag_dict
 
 
-def execute_dag_serially(dag, tasks, env, config):
-    """Naive serial scheduler for our tasks."""
-    len_task_names = list(map(len, tasks.keys()))
-    prevent_task_description_from_moving = max(len_task_names) if len_task_names else 0
+def _mark_which_tasks_need_to_be_executed(tasks, dag, env, config):
+    for id_ in nx.topological_sort(dag):
+        if id_ in tasks:
+            have_same_hashes = compare_hashes_of_task(id_, env, dag, config)
+            if not have_same_hashes:
+                tasks[id_]["_needs_to_be_executed"] = True
 
-    with tqdm(total=0) as t:
-        for id_ in nx.topological_sort(dag):
-            if id_ in tasks:
-                check_for_missing_dependencies(id_, env, dag)
-                have_same_hashes = compare_hashes_of_task(id_, env, dag, config)
-                if not have_same_hashes:
-                    t.total += 1
-                    t.update(0)
-                    t.set_description(id_.ljust(prevent_task_description_from_moving))
-                    _execute_task(id_, tasks, env, config)
-                    save_hash_of_task_target(id_, tasks, config)
-                    t.update()
+                # `missing_ok` in `Path.unlink()` was recently added in Python 3.8.
+                try:
+                    Path(tasks[id_]["produces"]).unlink()
+                except FileNotFoundError:
+                    pass
+            else:
+                tasks[id_]["_needs_to_be_executed"] = False
+
+    return tasks
 
 
-def check_for_missing_dependencies(id_, env, dag):
+def _check_for_missing_dependencies(id_, env, dag):
     for dependency in dag.predecessors(id_):
         if dependency in env.list_templates():
             pass
@@ -81,35 +76,5 @@ def check_for_missing_dependencies(id_, env, dag):
             path = Path(dependency)
             if not path.exists():
                 raise FileNotFoundError(
-                    f"Dependency '{path.resolve().as_posix()}' of task '{id_}' cannot "
-                    "be found."
+                    f"Dependency '{path.as_posix()}' of task '{id_}' cannot be found."
                 )
-
-
-def _execute_task(id_, tasks, env, config):
-    file = _render_task_template(tasks[id_], env)
-    if "produces" in tasks[id_]:
-        Path(tasks[id_]["produces"]).parent.mkdir(parents=True, exist_ok=True)
-
-    if tasks[id_]["template"].endswith(".py"):
-        try:
-            exec(file, {"__name__": "__main__"})
-        except Exception as e:
-            if config["is_debug"]:
-                type_, value, traceback = sys.exc_info()
-                pdb.post_mortem(traceback)
-            else:
-                raise e
-    elif tasks[id_]["template"].endswith(".r"):
-        if not IS_R_INSTALLED:
-            raise RuntimeError(
-                "R is not installed. Choose only Python templates or install 'rpy2' via"
-                " conda with `conda install -c conda-forge rpy2`."
-            )
-        robjects.r(file)
-
-
-def _render_task_template(task_info, env):
-    """Compile the file of the task."""
-    template = env.get_template(task_info["template"])
-    return template.render(**task_info)

@@ -8,7 +8,7 @@ def load_data(path):
         df = pd.read_feather(path)
     elif path.suffix == ".dta":
         df = pd.read_stata(path)
-    elif path.suffix == ".csv":
+    elif path.suffix == ".csv" or path.suffix == "":
         df = pd.read_csv(path)
     elif path.suffix == ".pkl":
         df = pd.read_pickle(path)

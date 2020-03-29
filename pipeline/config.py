@@ -29,6 +29,7 @@ def load_config():
         Path(config["project_root"], build_dir).resolve().as_posix()
     )
     config["hidden_build_directory"] = config["build_directory"] + "/.pipeline"
+    config["hidden_task_directory"] = config["build_directory"] + "/.tasks"
 
     custom_templates_dir = ensure_list(config.get("custom_templates", []))
     config["custom_templates"] = [

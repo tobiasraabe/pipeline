@@ -39,6 +39,19 @@ def compare_hashes_of_task(id_, env, dag, config):
     return have_same_hashes
 
 
+def save_hashes_of_task_dependencies(id_, env, dag, config):
+    hashes = _load_hashes(config)
+    for dependency in dag.predecessors(id_):
+        if dependency in env.list_templates():
+            pass
+        else:
+            path = Path(dependency)
+            hash_ = _compute_hash(path, path.stat().st_mtime)
+            hashes[id_][dependency] = hash_
+
+    _dump_hashes(hashes, config)
+
+
 def save_hash_of_task_target(id_, tasks, config):
     hashes = _load_hashes(config)
     path = Path(tasks[id_]["produces"])
