@@ -25,7 +25,7 @@ How does **pipeline** achieve this goal?
 1. **pipeline** does not bother you with declaring dependencies and targets of your
    tasks. It will handle both while you only need to connect the tasks. Outputs are
    hidden from you by default so that you are not bothered with intermediate results. If
-   you want have access to the output, simply assign a path.
+   you want access the outputs, simply assign explicit output path.
 
 2. **pipeline** uses both, R and Python, as backends. Users will experience the best of
    both worlds. Currently, R's ``stargazer`` package is unparalleled in its ability to
@@ -91,7 +91,18 @@ After you have defined some tasks, hit
 
     pipeline build
 
-to execute the tasks.
+to execute the tasks. If you want to enter the debugger if a task raises an exception,
+use
+
+.. code-block:: bash
+
+    pipeline build --debug
+
+For parallel tasks, hit
+
+.. code-block:: bash
+
+    pipeline build -n/--n-jobs <number-of-parallel-processes>
 
 
 Getting Started
