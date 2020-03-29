@@ -42,6 +42,7 @@ Other useful features!
 
 - Use the ``--debug`` flag to enter the post-mortem debugger if your build fails.
 - Tasks are not re-run unless anything related to the task has changed.
+- Parallel execution.
 
 
 Installation
@@ -109,18 +110,5 @@ Getting Started
 ---------------
 
 To get started with **pipeline**, please visit the `documentation
-<https://pipeline-wp.readthedocs.io/>`_.
-
-
-Todo
-----
-
-- **pipeline** is currently a working title. Please reach out to me if you have a
-  suggestion for a better title.
-- IMplement parallel execution
-- Write documentation
-- Write more tests
-- Extend existing function calls in templates and introduce general arguments which work
-  for R and Python.
-- User-defined global variables for Jinja2 templates.
-- Save tasks in dag as node attributes.
+<https://pipeline-wp.readthedocs.io/>`_ or the `sample project
+<https://github.com/OpenSourceEconomics/pipeline-demo-project>`_
