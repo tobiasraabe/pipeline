@@ -29,7 +29,7 @@ requirements:
     - joblib
     - matplotlib
     - networkx
-    - pandas >= 0.0.24
+    - pandas >=0.0.24
     - pyyaml
     - statsmodels
     - tqdm
