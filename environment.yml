@@ -26,6 +26,7 @@ dependencies:
   - statsmodels
   - tqdm
   - pip:
+    - bump2version
     - stargazer
   - r-irkernel
   - r-stargazer
