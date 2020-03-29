@@ -5,7 +5,7 @@ from setuptools import setup
 
 setup(
     name="pipeline",
-    version="0.0.1",
+    version="0.0.2",
     author="Tobias Raabe",
     author_email="raabe@posteo.de",
     python_requires=">=3.6.0",
