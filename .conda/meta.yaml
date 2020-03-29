@@ -7,7 +7,7 @@ package:
 source:
   # git_url is nice in that it won't capture devenv stuff.  However, it only captures
   # committed code, so pay attention.
-  path: ../
+  git_url: ../
 
 build:
   noarch: python
