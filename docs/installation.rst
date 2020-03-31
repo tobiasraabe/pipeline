@@ -2,7 +2,7 @@
 Installation
 ============
 
-.. Same as in README.rst.
+.. Synchronize with README.rst!
 
 **pipeline** is available on Anaconda.org. Use the following command for installation.
 
@@ -18,4 +18,5 @@ If you plan to use R templates as well, type
     $ conda config --add channels r
     $ conda install rpy2<3 tidyverse stargazer
 
-to get started with the least amount of packages.
+to get started with the minimum of packages. It is important that you do not use the
+third version of rpy2 on `Windows` as it is not supported.

@@ -52,11 +52,11 @@ def save_hashes_of_task_dependencies(id_, env, dag, config):
     _dump_hashes(hashes, config)
 
 
-def save_hash_of_task_target(id_, tasks, config):
+def save_hash_of_task_target(id_, dag, config):
     hashes = _load_hashes(config)
-    path = Path(tasks[id_]["produces"])
+    path = Path(dag.nodes[id_]["produces"])
     hash_ = _compute_hash(path, path.stat().st_mtime)
-    hashes[id_][tasks[id_]["produces"]] = hash_
+    hashes[id_][dag.nodes[id_]["produces"]] = hash_
     _dump_hashes(hashes, config)
 
 

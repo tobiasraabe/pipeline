@@ -12,44 +12,41 @@ CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
-@click.pass_context
 @click.version_option()
-def cli(ctx):
+def cli():
     """Command-line interface for pipeline."""
-    ctx.ensure_object(dict)
-    ctx.obj["config"] = load_config()
+    pass
 
 
 @cli.command()
-@click.option("--config", is_flag=True)
+@click.option("--configuration", is_flag=True)
 @click.option("--tasks", is_flag=True)
 @click.option("--templates", is_flag=True)
-@click.pass_context
-def collect(ctx, config, tasks, templates):
-    if config:
-        click.echo(ctx.obj["config"])
+def collect(configuration, tasks, templates):
+    config = load_config()
+    if configuration:
+        click.echo(config)
     if tasks:
-        click.echo(process_tasks(ctx.obj["config"]))
+        click.echo(process_tasks(config))
     if templates:
-        custom_templates = ctx.obj["config"].get("custom_templates", None)
+        custom_templates = config.get("custom_templates", None)
         click.echo(collect_templates(custom_templates)[0].list_templates())
 
 
 @cli.command()
-@click.pass_context
-@click.option("--debug", is_flag=True)
-@click.option("-n", "--n-jobs", default=1, type=int, help="Number of parallel jobs.")
-def build(ctx, debug, n_jobs):
+@click.option("--debug", is_flag=True, default=None)
+@click.option("-n", "--n-jobs", default=None, type=int, help="Number of parallel jobs.")
+@click.option("--priority", is_flag=True, help="Schedule tasks by priority.")
+def build(debug, n_jobs, priority):
     """Build the project."""
     click.echo("### Build Project")
-    ctx.obj["config"]["is_debug"] = debug
-    ctx.obj["config"]["n_jobs"] = n_jobs
-    build_project(ctx.obj["config"])
+    config = load_config(debug, n_jobs, priority)
+    build_project(config)
     click.echo("### Finished")
 
 
 @cli.command()
-@click.pass_context
-def clean(ctx):
+def clean():
     """Clean the project."""
-    shutil.rmtree(ctx.obj["config"]["build_directory"], ignore_errors=True)
+    config = load_config()
+    shutil.rmtree(config["build_directory"], ignore_errors=True)

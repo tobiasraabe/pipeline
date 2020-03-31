@@ -10,7 +10,7 @@ def load_data(path):
         df = pd.read_stata(path)
     elif path.suffix == ".csv" or path.suffix == "":
         df = pd.read_csv(path)
-    elif path.suffix == ".pkl":
+    elif path.suffix in [".pkl", ".pickle"]:
         df = pd.read_pickle(path)
     elif path.suffix == ".sav":
         df = pd.read_spss(path)
