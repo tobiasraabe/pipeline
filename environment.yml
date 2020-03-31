@@ -21,6 +21,7 @@ dependencies:
   - pyyaml
   - restructuredtext_lint
   - rpy2
+  - seaborn
   - sphinx
   - sphinx_rtd_theme
   - statsmodels

@@ -2,8 +2,9 @@
 Getting Started
 ===============
 
-To get started with **pipeline**, we will take a look at a demo project over at
-`OpenSourceEconomics <https://github.com/OpenSourceEconomics/pipeline-demo-project>`_.
+To get started with **pipeline**, we will take a look at the ``simple-project`` over at
+`OpenSourceEconomics/pipeline-demo-project
+<https://github.com/OpenSourceEconomics/pipeline-demo-project>`_.
 
 
 .pipeline.yaml
@@ -25,7 +26,7 @@ src, tasks, and templates
 
 By default, **pipeline** assumes that your tasks rest somewhere in ``src`` and searches
 the directory recursively. Tasks are defined in ``.yaml`` files. Let us take a look at
-``src/data_management.yaml``.
+``src/data_management.yaml`` and only at the first task.
 
 .. code-block:: yaml
 
