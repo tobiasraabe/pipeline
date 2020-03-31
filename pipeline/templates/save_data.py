@@ -2,19 +2,17 @@ from pathlib import Path
 import pandas as pd
 
 
-def load_data(path):
+def save_data(path):
     path = Path(path)
 
     if path.suffix == ".feather":
-        df = pd.read_feather(path)
+        df = pd.to_feather(path)
     elif path.suffix == ".dta":
-        df = pd.read_stata(path)
+        df = pd.to_stata(path)
     elif path.suffix == ".csv" or path.suffix == "":
-        df = pd.read_csv(path)
+        df = pd.to_csv(path)
     elif path.suffix in [".pkl", ".pickle"]:
-        df = pd.read_pickle(path)
-    elif path.suffix == ".sav":
-        df = pd.read_spss(path)
+        df = pd.to_pickle(path)
     else:
         raise NotImplementedError
 

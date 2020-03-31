@@ -1,4 +1,5 @@
 """This module comprises all CLI capabilities of pipeline."""
+import pprint
 import shutil
 
 import click
@@ -30,7 +31,7 @@ def collect(configuration, tasks, templates):
         click.echo(process_tasks(config))
     if templates:
         custom_templates = config.get("custom_templates", None)
-        click.echo(collect_templates(custom_templates)[0].list_templates())
+        pprint.pprint(collect_templates(custom_templates)[0].list_templates())
 
 
 @cli.command()

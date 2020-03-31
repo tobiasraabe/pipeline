@@ -5,6 +5,7 @@ from concurrent.futures.process import ProcessPoolExecutor
 from pathlib import Path
 
 import click
+import jinja2
 import networkx as nx
 from tqdm import tqdm
 
@@ -120,7 +121,7 @@ def execute_dag_parallelly(dag, env, config):
 
 
 def _preprocess_task(id_, dag, env, config):
-    file = _render_task_template(dag.nodes[id_], env)
+    file = _render_task_template(id_, dag.nodes[id_], env)
 
     if "produces" in dag.nodes[id_]:
         Path(dag.nodes[id_]["produces"]).parent.mkdir(parents=True, exist_ok=True)
@@ -188,7 +189,15 @@ def _process_task_target(id_, dag, config):
     save_hash_of_task_target(id_, dag, config)
 
 
-def _render_task_template(task_info, env):
+def _render_task_template(id_, task_info, env):
     """Compile the file of the task."""
     template = env.get_template(task_info["template"])
-    return template.render(**task_info)
+
+    try:
+        rendered_template = template.render(**task_info)
+    except jinja2.exceptions.UndefinedError as e:
+        raise jinja2.exceptions.UndefinedError(
+            f"Task '{id_}' has an undefined variable."
+        ).with_traceback(e.__traceback__)
+    else:
+        return rendered_template

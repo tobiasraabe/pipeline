@@ -21,6 +21,7 @@ If you want to learn about Jinja2 templates in general, see
    :caption: Utilities
 
    load_data
+   save_data
 
 .. toctree::
    :maxdepth: 1
@@ -29,6 +30,8 @@ If you want to learn about Jinja2 templates in general, see
    ols
    logit
    probit
+   ologit
+   oprobit
    estimation
 
 

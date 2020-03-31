@@ -4,7 +4,7 @@ suppressMessages(library(tidyverse))
 
 df = suppressMessages(load_data("{{ depends_on }}"))
 
-df %>% mutate_if(is.character, as.factor) -> df
+# df %>% mutate_if(is.character, as.factor) -> df
 
 {% block estimation_method %}{% endblock %}
 
