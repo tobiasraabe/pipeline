@@ -27,6 +27,7 @@ def cli(ctx):
 @click.option("--templates", is_flag=True)
 @click.pass_context
 def collect(ctx, config, tasks, templates):
+    """Collect various components of the workflow."""
     if config:
         pprint.pprint(ctx.obj["config"])
     if tasks:

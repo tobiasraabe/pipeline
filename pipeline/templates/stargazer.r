@@ -2,11 +2,34 @@
 # https://www.rdocumentation.org/packages/stargazer/versions/5.2.2/topics/stargazer
 
 suppressMessages(library(stargazer))
+library(xtable)
+library(functional)
+
 
 load_model <- function(path){
     model <- readRDS(path)
+    return(model)
 }
 
-models <- sapply(c{{ tuple(ensure_list(depends_on)) }}, load_model)
+format_covariate_labels <- function(model){
+    labels <- sanitize(rownames(coef(summary(model))), type="latex")
+    return(labels)
+}
 
-capture.output(stargazer(models, title="Regression Results", align=TRUE, out="{{ produces }}"))
+format_dependent_labels <- function(model){
+    label <- sanitize(all.vars(formula(model))[1], type="latex")
+    return(label)
+}
+
+models <- lapply({{ ensure_r_vector(depends_on) }}, load_model)
+
+curry <- Curry(
+    stargazer,
+    title="Regression Results",
+    align=TRUE,
+    covariate.labels = sapply(models, format_covariate_labels),
+    dep.var.labels = sapply(models, format_dependent_labels),
+    out="{{ produces }}"
+)
+
+capture.output(do.call(curry, models))

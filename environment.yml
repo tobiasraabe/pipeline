@@ -28,6 +28,10 @@ dependencies:
   - pip:
     - bump2version
     - stargazer
+  - r-feather
+  - r-functional
   - r-irkernel
+  - r-mass
   - r-stargazer
   - r-tidyverse
+  - r-xtable
