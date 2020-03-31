@@ -2,7 +2,7 @@
 Estimations
 ===========
 
-**pipeline** offers :doc:`../templates/index.rst` for various estimation methods. To
+**pipeline** offers :doc:`../templates/index` for various estimation methods. To
 generate multiple models, the ``formula`` is a powerful tool.
 
 
