@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import jinja2
 from pipeline.shared import ensure_list
+import numbers
 
 
 def collect_templates(custom_templates, tasks=None):
@@ -33,6 +34,7 @@ def collect_templates(custom_templates, tasks=None):
     register_as_template_function(tuple)
     register_as_template_function(Path)
     register_as_template_function(ensure_list)
+    register_as_template_function(ensure_r_vector)
 
     return env, missing_templates
 
@@ -70,3 +72,18 @@ class _FileLoader(jinja2.BaseLoader):
 
     def list_templates(self):
         return self.files
+
+
+def ensure_r_vector(x):
+    if isinstance(x, str):
+        out = f"c('{x}')"
+    elif isinstance(x, (tuple, list)):
+        mapped = map(lambda l: str(l) if isinstance(l, numbers.Number) else f"'{l}'", x)
+        concatenated = ", ".join(mapped)
+        out = f"c({concatenated})"
+    else:
+        raise NotImplementedError(
+            f"'ensure_r_vector' is not defined for dtype {type(x)}"
+        )
+
+    return out

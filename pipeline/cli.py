@@ -1,4 +1,5 @@
 """This module comprises all CLI capabilities of pipeline."""
+import pprint
 import shutil
 
 import click
@@ -26,13 +27,14 @@ def cli(ctx):
 @click.option("--templates", is_flag=True)
 @click.pass_context
 def collect(ctx, config, tasks, templates):
+    """Collect various components of the workflow."""
     if config:
-        click.echo(ctx.obj["config"])
+        pprint.pprint(ctx.obj["config"])
     if tasks:
         click.echo(process_tasks(ctx.obj["config"]))
     if templates:
         custom_templates = ctx.obj["config"].get("custom_templates", None)
-        click.echo(collect_templates(custom_templates)[0].list_templates())
+        pprint.pprint(collect_templates(custom_templates)[0].list_templates())
 
 
 @cli.command()

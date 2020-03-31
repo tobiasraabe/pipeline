@@ -62,10 +62,11 @@ If you plan to use R templates as well, type
 .. code-block:: bash
 
     $ conda config --add channels r
-    $ conda install rpy2<3 tidyverse stargazer
+    $ conda install rpy2<3 r-feather r-functional r-irkernel r-mass r-stargazer \
+                    r-tidyverse r-xtable
 
 to get started with the minimum of packages. It is important that you do not use the
-third version of rpy2 as it is unstable.
+third version of rpy2 on Windows.
 
 
 Usage
