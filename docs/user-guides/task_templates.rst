@@ -9,7 +9,7 @@ All variables variables defined in a task dictionary are available in the templa
 For example, a data set should be generated with multiple seeds, then the task may look
 like
 
-.. code-block:: yaml
+.. code-block::
 
     {% for i in range(10) %}
     create-random-data-{{ i }}:
