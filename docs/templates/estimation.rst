@@ -2,6 +2,12 @@
 Template for estimations
 ========================
 
+.. warning::
+
+    Tasks in this module should not be used by the user directly, but are part of other
+    templates.
+
+
 estimation.py
 -------------
 
