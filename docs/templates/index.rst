@@ -27,12 +27,12 @@ If you want to learn about Jinja2 templates in general, see
    :maxdepth: 1
    :caption: Estimation
 
-   ols
-   logit
-   probit
-   ologit
-   oprobit
    estimation
+   logit
+   ologit
+   ols
+   oprobit
+   probit
 
 
 .. toctree::
@@ -40,3 +40,12 @@ If you want to learn about Jinja2 templates in general, see
    :caption: Results
 
    stargazer
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Figures
+
+   distplot
+   figure
+   regplot
