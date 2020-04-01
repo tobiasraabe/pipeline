@@ -3,12 +3,9 @@ coverage:
   precision: 2
   round: down
   status:
-    project:
-      threshold: 5%
-    patch:
+    default:
       threshold: 5%
 
 ignore:
   - ".tox/**/*"
-  - "release.py"
   - "setup.py"
