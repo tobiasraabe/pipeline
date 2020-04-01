@@ -20,4 +20,4 @@ If you plan to use R templates as well, type
                     r-tidyverse r-xtable
 
 to get started with the minimum of packages. It is important that you do not use the
-third version of rpy2 on Windows.
+third version of ``rpy2`` on Windows.

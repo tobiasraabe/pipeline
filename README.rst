@@ -66,14 +66,14 @@ If you plan to use R templates as well, type
                     r-tidyverse r-xtable
 
 to get started with the minimum of packages. It is important that you do not use the
-third version of rpy2 on Windows.
+third version of ``rpy2`` on Windows.
 
 
 Usage
 -----
 
-Go into your project folder and create a `.pipeline.yaml` file which can be empty. Then,
-type
+Go into your project folder and create a ``.pipeline.yaml`` file which can be empty.
+Then, type
 
 .. code-block:: bash
 

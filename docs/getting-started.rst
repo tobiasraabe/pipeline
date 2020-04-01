@@ -2,8 +2,8 @@
 Getting Started
 ===============
 
-To get started with **pipeline**, we will take a look at the ``simple-project`` over at
-`OpenSourceEconomics/pipeline-demo-project
+To get started with **pipeline**, we will create a project similar to the
+``simple-project`` over at `OpenSourceEconomics/pipeline-demo-project
 <https://github.com/OpenSourceEconomics/pipeline-demo-project>`_.
 
 
@@ -18,7 +18,7 @@ indicates the top of the project. To inspect the default configuration, type
     $ pipeline collect --config
 
 If you want to deviate from the current configuration, add your keys and values to
-``.pipeline.yaml``.
+``.pipeline.yaml``. See more on this in :doc:`user-guides/configuration`.
 
 
 src, tasks, and templates
@@ -29,6 +29,8 @@ the directory recursively. Tasks are defined in ``.yaml`` files. Let us take a l
 ``src/data_management.yaml`` and only at the first task.
 
 .. code-block:: yaml
+
+    # data_management.yaml
 
     create-random-data:
       template: create_random_data.py
@@ -46,23 +48,40 @@ insert variables. Here, you have two options: First, you can leave it as it is a
 your ``data_management.yaml`` and insert ``produces: {{ build_directory
 }}/data/random-data.csv`` below template, to make the output path explicit.
 
-Next, we want to run OLS and logistic regressions on our random data. For that, we
-define an ``analysis.yaml``. If you look at the file, you will find even more curly
-braces. For **pipeline**, not only are templates evaluated with Jinja2, but also your
-task files. The syntax is easy to understand and says, that you want to execute the task
-twice, for ``"ols"`` and ``"logit"``. Insert the loop variable to your task id to make
-it unique and use the method to select the pre-defined ``ols.r`` template. Formula gives
-you the equation of the regression you want to run. A part of **pipeline**'s
-user-friendliness is due to the ``depends_on`` key. Here, you would have normally given
-the path to the random data, but with **pipeline** you only need to reference the task
-id which generated the data.
+Next, we want to run OLS regression on our random data. For that, we define an
+``analysis.yaml``.
+
+.. code-block:: yaml
+
+    # analysis.yaml
+
+    regression-random-data-ols-r:
+      template: ols.r
+      formula: y ~ x
+      depends_on: create-random-data
+
+For the task, we select the pre-defined ``ols.r`` template which runs the OLS regression
+in R. The template requires a linear model and data. The formula gives you the equation
+of the regression you want to run. A part of **pipeline**'s user-friendliness is due to
+the ``depends_on`` key. Here, you would have normally given the path to the random data,
+but with **pipeline** you only need to reference the task id which generated the data.
 
 Why have we run the regressions in R? Because R has ``stargazer``, an amazing package to
-produce publication-ready regression tables. Let us look at ``tables.yaml``. We define a
-new task ``regression-table`` and select the ``stargazer.r`` template. There is also a
-``stargazer.py`` template, but it is less powerful and cannot combine OLS and logistic
-regressions and deal with different dependent variables. Under ``depends_on``, we
-reference the previous two tasks which ran the regressions. At last, we explicitly use
+produce publication-ready regression tables. Let us look at ``tables.yaml``.
+
+.. code-block:: yaml
+
+    # tables.yaml
+
+    regression-table-r:
+      template: stargazer.r
+      depends_on: regression-random-data-ols-r
+      produces: {{ build_directory }}/tables/regression-table-r.html
+
+We define a new task ``regression-table`` and select the ``stargazer.r`` template. There
+is also a ``stargazer.py`` template, but it is less powerful and cannot combine OLS and
+logistic regressions and deal with different dependent variables. Under ``depends_on``,
+we reference the previous task which ran the regression. At last, we explicitly use
 ``produces`` because we want to inspect the regression table in the end. The table will
 be converted to ``.html``, but Latex is also possible with ``.tex`` as the file suffix.
 
@@ -76,12 +95,18 @@ To execute the pipeline, hit
 
     pipeline build
 
+Check out the flags provided for build process with ``pipeline build -h`` which comprise parallelization, debugging and more.
+
 
 bld
 ---
 
-You will find your regression table in ``bld``.
+You will find your regression table in ``bld/tables/regression-table-r.html``.
 
 There is also a hidden folder named ``.pipeline``. It contains intermediate or internal
 files produced by **pipeline**. You can also find a visualization of the projects
 directed acyclic graph (DAG).
+
+If a task throws and error, you might, apart from debugging, want to take a look at the
+``bld/.tasks`` folder which contains the compiled task template. You might find an error
+while expecting this file.
