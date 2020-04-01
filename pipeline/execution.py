@@ -176,11 +176,7 @@ def _execute_task(id_, path, is_debug):
 
 
 def _format_exception_message(id_, path, e):
-    exc_info = (
-        e.__str__()
-        if not isinstance(e, subprocess.CalledProcessError)
-        else e.stderr.decode("utf-8")
-    )
+    exc_info = e.__str__()
     return f"\n\nTask '{id_}' in file '{path}' failed.\n\n{exc_info}"
 
 
