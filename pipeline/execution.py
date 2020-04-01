@@ -121,7 +121,7 @@ def execute_dag_parallelly(dag, tasks, env, config):
 
 
 def _preprocess_task(id_, tasks, env, config):
-    file = _render_task_template(id_, tasks[id_], env)
+    file = _render_task_template(id_, tasks[id_], env, config)
 
     if "produces" in tasks[id_]:
         Path(tasks[id_]["produces"]).parent.mkdir(parents=True, exist_ok=True)
@@ -176,7 +176,11 @@ def _execute_task(id_, path, is_debug):
 
 
 def _format_exception_message(id_, path, e):
-    exc_info = e.__str__() if isinstance(e, RRuntimeError) else e.stderr.decode("utf-8")
+    exc_info = (
+        e.__str__()
+        if not isinstance(e, subprocess.CalledProcessError)
+        else e.stderr.decode("utf-8")
+    )
     return f"\n\nTask '{id_}' in file '{path}' failed.\n\n{exc_info}"
 
 
@@ -189,12 +193,12 @@ def _process_task_target(id_, tasks, config):
     save_hash_of_task_target(id_, tasks, config)
 
 
-def _render_task_template(id_, task_info, env):
+def _render_task_template(id_, task_info, env, config):
     """Compile the file of the task."""
     template = env.get_template(task_info["template"])
 
     try:
-        rendered_template = template.render(**task_info)
+        rendered_template = template.render(globals=config["globals"], **task_info)
     except jinja2.exceptions.UndefinedError as e:
         raise jinja2.exceptions.UndefinedError(
             f"Task '{id_}' has an undefined variable."
