@@ -95,7 +95,8 @@ To execute the pipeline, hit
 
     pipeline build
 
-Check out the flags provided for build process with ``pipeline build -h`` which comprise parallelization, debugging and more.
+Check out the flags provided for build process with ``pipeline build -h`` which comprise
+parallelization, debugging and more.
 
 
 bld

@@ -32,7 +32,7 @@ value inside ``.pipeline.yaml``. For example, to change the ``build_directory``,
 
 .. code-block:: yaml
 
-    build_directory: "build"
+    build_directory: build
 
 which will be interpreted as a relative path to the project directory or the
 ``.pipeline.yaml`` file. You can also use absolute paths which will not be extended.
@@ -89,7 +89,7 @@ and define a dictionary of named variables.
     # .pipeline.yaml
 
     globals:
-      dependent_variables: ["y1", "y2", "y3"]
+      dependent_variables: [y1, y2, y3]
 
 If you want to know how to use them inside tasks and templates, see
 :ref:`global_variables_in_tasks_and_templates`.

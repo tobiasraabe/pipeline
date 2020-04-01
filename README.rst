@@ -50,7 +50,9 @@ Installation
 
 .. Same as in docs/installation.rst.
 
-**pipeline** is available on Anaconda.org. Use the following command for installation.
+**pipeline** is available on `Anaconda.org
+<https://anaconda.org/OpenSourceEconomics/pipeline>`_. Use the following command for
+installation.
 
 .. code-block:: bash
 
@@ -67,6 +69,7 @@ If you plan to use R templates as well, type
 
 to get started with the minimum of packages. It is important that you do not use the
 third version of ``rpy2`` on Windows.
+
 
 
 Usage
