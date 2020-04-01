@@ -4,6 +4,7 @@ from pathlib import Path
 import jinja2
 
 from pipeline._yaml import read_yaml
+from pipeline.exceptions import DuplicatedTaskError
 
 
 def process_tasks(config):
@@ -43,10 +44,9 @@ def _collect_user_defined_tasks(config):
             for id_ in tasks_in_file:
                 tasks_in_file[id_]["config"] = path.as_posix()
 
-            task_ids_in_file = tasks_in_file.keys()
-            duplicated_ids = any(name in tasks for name in task_ids_in_file)
+            duplicated_ids = set(tasks_in_file) & set(tasks)
             if duplicated_ids:
-                raise ValueError(f"There are duplicated task ids: {duplicated_ids}.")
+                raise DuplicatedTaskError(duplicated_ids)
 
             tasks.update(tasks_in_file)
 
