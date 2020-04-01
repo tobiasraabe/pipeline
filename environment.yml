@@ -18,6 +18,7 @@ dependencies:
   - pandas
   - pre-commit
   - pytest
+  - pytest-cov
   - pyyaml
   - restructuredtext_lint
   - rpy2
