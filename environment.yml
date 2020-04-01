@@ -18,9 +18,11 @@ dependencies:
   - pandas
   - pre-commit
   - pytest
+  - pytest-cov
   - pyyaml
   - restructuredtext_lint
   - rpy2
+  - seaborn
   - sphinx
   - sphinx_rtd_theme
   - statsmodels

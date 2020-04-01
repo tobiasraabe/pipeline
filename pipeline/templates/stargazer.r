@@ -11,15 +11,18 @@ load_model <- function(path){
     return(model)
 }
 
+
 format_covariate_labels <- function(model){
     labels <- sanitize(rownames(coef(summary(model))), type="latex")
     return(labels)
 }
 
+
 format_dependent_labels <- function(model){
     label <- sanitize(all.vars(formula(model))[1], type="latex")
     return(label)
 }
+
 
 models <- lapply({{ ensure_r_vector(depends_on) }}, load_model)
 

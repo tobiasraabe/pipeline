@@ -4,30 +4,31 @@ from pipeline._yaml import read_yaml
 from pipeline.shared import ensure_list
 
 
-def load_config(debug=False, n_jobs=1, priority=False):
-    config = _read_config_file()
+def load_config(debug=False, n_jobs=1, priority=False, config=None):
+    if config is None:
+        path = Path.cwd() / ".pipeline.yaml"
 
-    project_directory = config.get(
-        "project_directory", Path(config["user_config_file"]).parent
-    )
-    config["project_directory"] = Path(project_directory).resolve().as_posix()
+        if path.exists():
+            config = read_yaml(path.read_text())
+            config = {} if not config else config
+            config["user_config_file"] = path.as_posix()
+            config["user_config_directory"] = path.parent.as_posix()
+        else:
+            raise ValueError("Cannot find '.pipeline.yaml' in current directory.")
 
-    source_dir = config.get("source_directory", "src")
-    config["source_directory"] = (
-        Path(config["project_directory"], source_dir).resolve().as_posix()
-    )
+    for key, default, default_parent in [
+        ("project_directory", ".", "user_config_directory"),
+        ("source_directory", "src", "project_directory"),
+        ("build_directory", "bld", "project_directory"),
+        ("hidden_build_directory", ".pipeline", "build_directory"),
+        ("hidden_task_directory", ".tasks", "build_directory"),
+    ]:
+        config[key] = _generate_path(key, default, default_parent, config)
 
-    build_dir = config.get("build_directory", "bld")
-    config["build_directory"] = (
-        Path(config["project_directory"], build_dir).resolve().as_posix()
-    )
-    config["hidden_build_directory"] = config["build_directory"] + "/.pipeline"
-    config["hidden_task_directory"] = config["build_directory"] + "/.tasks"
-
-    custom_templates_dir = ensure_list(config.get("custom_templates", []))
+    custom_templates_dirs = ensure_list(config.get("custom_templates", []))
     config["custom_templates"] = [
-        Path(config["project_directory"], path).resolve().as_posix()
-        for path in custom_templates_dir
+        _generate_path(path, default_parent="project_directory", config=config)
+        for path in custom_templates_dirs
     ]
 
     config["_is_debug"] = debug
@@ -58,3 +59,17 @@ def _read_config_file():
         raise ValueError("There can only be one configuration file.")
 
     return config
+
+
+def _generate_path(key_or_path, default=None, default_parent=None, config=None):
+    if default is None:
+        path = Path(key_or_path)
+    else:
+        path = Path(config.get(key_or_path, default))
+
+    if path.is_absolute():
+        pass
+    else:
+        path = Path(config[default_parent], path).resolve().as_posix()
+
+    return path

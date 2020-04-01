@@ -1,0 +1,11 @@
+coverage:
+  range: 50...100
+  precision: 2
+  round: down
+  status:
+    default:
+      threshold: 5%
+
+ignore:
+  - ".tox/**/*"
+  - "setup.py"

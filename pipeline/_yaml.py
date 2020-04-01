@@ -1,5 +1,7 @@
 import yaml
 
+from pipeline.exceptions import DuplicatedTaskError
+
 
 class YamlLoader(yaml.SafeLoader):
     """Custom YAML loader which forbids duplicate keys.
@@ -18,7 +20,7 @@ def construct_maping(loader, node, deep=False):
     for key_node, value_node in node.value:
         key = loader.construct_object(key_node, deep=deep)
         if key in result:
-            raise yaml.constructor.ConstructorError(f"Duplicate key {key}")
+            raise DuplicatedTaskError(key)
         result[key] = loader.construct_object(value_node, deep=deep)
     return result
 

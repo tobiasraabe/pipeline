@@ -13,7 +13,7 @@ def collect_templates(custom_templates, tasks=None):
     """
     tasks = {} if tasks is None else tasks
 
-    custom_templates = jinja2.FileSystemLoader(custom_templates)
+    custom_templates = _FileAndDirectoryLoader(custom_templates)
     internal_templates = jinja2.PackageLoader("pipeline", "templates")
     task_templates, missing_templates = _collect_missing_templates(
         tasks, custom_templates, internal_templates
@@ -26,7 +26,8 @@ def collect_templates(custom_templates, tasks=None):
         undefined=jinja2.StrictUndefined,
     )
 
-    # Register some Python functions which can be used in the templates.
+    # Register some Python functions which can be used in the templates. Must be
+    # enclosed in this function to pick up the environment.
     def register_as_template_function(func):
         env.globals[func.__name__] = func
         return func
@@ -48,18 +49,20 @@ def _collect_missing_templates(tasks, custom, internal):
             path = (Path(task_info["config"]).parent / task_info["template"]).as_posix()
             missing_templates[task_info["template"]] = path
 
-    return _FileLoader(missing_templates.values()), missing_templates
+    return _FileAndDirectoryLoader(missing_templates.values()), missing_templates
 
 
-class _FileLoader(jinja2.BaseLoader):
-    """This loader allows to load single files.
+class _FileAndDirectoryLoader(jinja2.BaseLoader):
+    """This loader allows to load single files and directories."""
 
-    Why do I even need to program this?
-
-    """
-
-    def __init__(self, files):
-        self.files = files
+    def __init__(self, paths):
+        self.files = []
+        for path in paths:
+            if Path(path).is_dir():
+                files_in_dir = [file.as_posix() for file in Path(path).glob("*")]
+                self.files.extend(files_in_dir)
+            else:
+                self.files.append(path)
 
     def get_source(self, environment, template):  # noqa: U100
         if template not in self.files:

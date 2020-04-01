@@ -1,4 +1,4 @@
-Template for OLS
+Template for ols
 ================
 
 ols.py

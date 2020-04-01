@@ -1,5 +1,5 @@
 ======================
-Template for Stargazer
+Template for stargazer
 ======================
 
 stargazer.py

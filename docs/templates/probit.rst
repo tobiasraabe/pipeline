@@ -1,5 +1,5 @@
 ===================
-Template for Probit
+Template for probit
 ===================
 
 probit.py
