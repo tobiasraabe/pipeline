@@ -14,7 +14,7 @@ from pipeline.tasks import process_tasks
 def test_duplicated_task_ids_in_the_same_file(test_project_config):
     """Test whether a duplicated task in the same file raises an error."""
     config = test_project_config
-    config = load_config(config)
+    config = load_config(config=config)
 
     source_directory = Path(config["source_directory"])
     source_directory.mkdir()
@@ -41,7 +41,7 @@ def test_duplicated_task_ids_in_the_same_file(test_project_config):
 def test_duplicated_task_ids_in_different_files(test_project_config):
     """Test whether a duplicated task in separate files raises an error."""
     config = test_project_config
-    config = load_config(config)
+    config = load_config(config=config)
 
     source_directory = Path(config["source_directory"])
     source_directory.mkdir()

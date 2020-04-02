@@ -20,17 +20,17 @@ def cli():
 
 
 @cli.command()
-@click.option("--configuration", is_flag=True)
+@click.option("--config", is_flag=True)
 @click.option("--tasks", is_flag=True)
 @click.option("--templates", is_flag=True)
-def collect(configuration, tasks, templates):
-    config = load_config()
-    if configuration:
-        click.echo(config)
+def collect(config, tasks, templates):
+    config_ = load_config()
+    if config:
+        click.echo(config_)
     if tasks:
-        click.echo(process_tasks(config))
+        click.echo(process_tasks(config_))
     if templates:
-        custom_templates = config.get("custom_templates", None)
+        custom_templates = config_.get("custom_templates", None)
         pprint.pprint(collect_templates(custom_templates)[0].list_templates())
 
 
