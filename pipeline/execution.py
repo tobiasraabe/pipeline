@@ -5,15 +5,15 @@ from concurrent.futures.process import ProcessPoolExecutor
 from pathlib import Path
 
 import click
-import jinja2
 import networkx as nx
 from tqdm import tqdm
 
 from pipeline.exceptions import TaskError
+from pipeline.hashing import compare_hashes_of_task
 from pipeline.hashing import save_hash_of_task_target
 from pipeline.hashing import save_hashes_of_task_dependencies
 from pipeline.shared import ensure_list
-
+from pipeline.shared import render_task_template
 
 try:
     import rpy2
@@ -35,8 +35,23 @@ TQDM_BAR_FORMAT = "{l_bar}{bar}|{n_fmt}/{total_fmt} tasks in {elapsed}"
 
 
 def execute_dag_serially(dag, env, config):
-    """Naive serial scheduler for our tasks."""
-    unfinished_tasks = {id_ for id_ in dag.nodes if dag.nodes[id_]["_is_unfinished"]}
+    """Execute the DAG serially.
+
+    This function executes the tasks ordered topological which means it is an ordering
+    which ensures that a node is only visited if all of its preceding nodes are visited
+    before.
+
+    Parameters
+    ----------
+    dag : nx.DiGraph
+        The DAG containing the complete workflow.
+    env : jinja2.Environment
+        An environment which manages the templates.
+    config : dict
+        The workflow configuration.
+
+    """
+    unfinished_tasks = _collect_unfinished_tasks(dag, env, config)
     len_task_names = list(map(len, unfinished_tasks))
     prevent_task_description_from_moving = max(len_task_names) if len_task_names else 0
 
@@ -57,7 +72,7 @@ def execute_dag_serially(dag, env, config):
 
 
 def execute_dag_parallelly(dag, env, config):
-    unfinished_tasks = {id_ for id_ in dag.nodes if dag.nodes[id_]["_is_unfinished"]}
+    unfinished_tasks = _collect_unfinished_tasks(dag, env, config)
     finished_tasks = {id_ for id_ in dag.nodes if id_ not in unfinished_tasks}
     len_task_names = list(map(len, unfinished_tasks))
     prevent_task_description_from_moving = max(len_task_names) if len_task_names else 0
@@ -120,8 +135,39 @@ def execute_dag_parallelly(dag, env, config):
             time.sleep(0.1)
 
 
+def _collect_unfinished_tasks(dag, env, config):
+    """Collect unfinished tasks.
+
+    Iterate over topological sorted nodes in the DAG. If the node is a task, compare the
+    hashes of all dependencies and targets. If the hashes do not match, add the task to
+    the set of unfinished tasks. After that, go through the whole list of descendants of
+    the task and mark all tasks among them as unfinished, too.
+
+    Parameters
+    ----------
+    dag : nx.DiGraph
+        The DAG containing the complete workflow.
+    env : jinja2.Environment
+        An environment which manages the templates.
+    config : dict
+        The workflow configuration.
+
+    """
+    unfinished_tasks = set()
+    for id_ in nx.topological_sort(dag):
+        if dag.nodes[id_]["_is_task"] and id_ not in unfinished_tasks:
+            have_same_hashes = compare_hashes_of_task(id_, env, dag, config)
+            if not have_same_hashes:
+                unfinished_tasks.add(id_)
+                for descendant in nx.descendants(dag, id_):
+                    if dag.nodes[descendant]["_is_task"]:
+                        unfinished_tasks.add(descendant)
+
+    return unfinished_tasks
+
+
 def _preprocess_task(id_, dag, env, config):
-    file = _render_task_template(id_, dag.nodes[id_], env, config)
+    file = render_task_template(id_, dag.nodes[id_], env, config)
 
     if "produces" in dag.nodes[id_]:
         Path(dag.nodes[id_]["produces"]).parent.mkdir(parents=True, exist_ok=True)
@@ -181,23 +227,13 @@ def _format_exception_message(id_, path, e):
 
 
 def _process_task_target(id_, dag, config):
-    path = Path(dag.nodes[id_]["produces"])
-    if not path.exists():
+    """Process the target of the task."""
+    targets = ensure_list(dag.nodes[id_]["produces"])
+    missing_targets = [
+        Path(target).as_posix() for target in targets if not Path(target).exists()
+    ]
+    if missing_targets:
         raise FileNotFoundError(
-            f"Target '{path.as_posix()}' was not produced by task '{id_}'."
+            f"Target(s) '{missing_targets}' was(were) not produced by task '{id_}'."
         )
     save_hash_of_task_target(id_, dag, config)
-
-
-def _render_task_template(id_, task_info, env, config):
-    """Compile the file of the task."""
-    template = env.get_template(task_info["template"])
-
-    try:
-        rendered_template = template.render(globals=config["globals"], **task_info)
-    except jinja2.exceptions.UndefinedError as e:
-        raise jinja2.exceptions.UndefinedError(
-            f"Task '{id_}' has an undefined variable."
-        ).with_traceback(e.__traceback__)
-    else:
-        return rendered_template

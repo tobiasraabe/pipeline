@@ -33,6 +33,8 @@ def load_config(debug=False, n_jobs=1, priority=False, config=None):
 
     config["_is_debug"] = debug
 
+    config["globals"] = config.get("globals", {})
+
     config["priority"] = priority
     config["priority_discount_factor"] = config.get("priority_discount_factor", 1)
 

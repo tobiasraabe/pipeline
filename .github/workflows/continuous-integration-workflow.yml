@@ -41,6 +41,7 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
 
       - name: Run sphinx.
         if: runner.os == 'Linux' && matrix.python-version == '3.7'

@@ -10,6 +10,9 @@ pipeline
 .. image:: https://readthedocs.org/projects/pipeline-wp/badge/?version=latest
     :target: https://pipeline-wp.readthedocs.io/en/latest
 
+.. image:: https://codecov.io/gh/OpenSourceEconomics/pipeline/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/OpenSourceEconomics/pipeline
+
 .. image:: https://img.shields.io/badge/License-BSD-yellow.svg
     :target: https://opensource.org/licenses/BSD
 
