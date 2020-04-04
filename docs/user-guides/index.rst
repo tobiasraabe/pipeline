@@ -8,3 +8,4 @@ User Guides
    configuration
    tasks
    estimations
+   debugging

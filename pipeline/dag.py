@@ -8,6 +8,59 @@ import numpy as np
 from pipeline.shared import ensure_list
 
 
+class TopologicalScheduler:
+    def __init__(self, dag, unfinished_tasks, executor="serial", priority=False):
+        if not dag.is_directed():
+            raise nx.NetworkXError("Topological sort not defined on undirected graphs.")
+        self.dag = dag
+
+        self.unfinished_tasks = unfinished_tasks
+        self.submitted_tasks = set()
+        self.priority = priority
+
+        if executor not in ["serial", "parallel"]:
+            raise NotImplementedError("The executor can either be serial or parallel.")
+        self.executor = executor
+
+    def _create_task_dependency_dict(self):
+        """Create a task-dependency dictionary.
+
+        For each unfinished task, this function collects the tasks which have to be
+        executed before it.
+
+        """
+        self.task_dict = {}
+        for id_ in self.unfinished_tasks:
+            self.task_dict[id_] = {
+                preceding_task
+                for dependency in ensure_list(self.dag.nodes[id_].get("depends_on", []))
+                for preceding_task in self.dag.predecessors(dependency)
+                if preceding_task in self.unfinished_tasks
+            }
+
+    def propose(self, n_proposals=1):
+        candidates = {
+            id_ for id_ in self.unfinished_tasks if len(self.task_dict[id_]) == 0
+        }
+
+        if candidates:
+            if self.executor == "serial":
+                id_ = candidates[0]
+                self.submitted_tasks.add(id_)
+
+                return set(id_)
+            else:
+                self.submitted_tasks = self.submitted_tasks | candidates
+
+                return candidates
+        else:
+            n_proposals
+
+    def receive_finished(self, finished_tasks):
+        for id_ in finished_tasks:
+            del self.unfinished_tasks[id_]
+
+
 def create_dag(tasks, config):
     """Create a directed acyclic graph (DAG) capturing dependencies between functions.
 
@@ -82,7 +135,7 @@ def _assign_priority_to_nodes(dag, config):
 def _draw_dag(dag, config):
     fig, ax = plt.subplots(figsize=(16, 12))
 
-    # Relabel nodes.
+    # Relabel absolute paths to path names.
     mapping = {node: Path(node).name for node in dag.nodes}
     dag = nx.relabel_nodes(dag, mapping)
 
