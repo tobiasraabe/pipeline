@@ -1,64 +1,127 @@
-import warnings
+"""This module contains the code related to the DAG and the scheduler."""
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
+from matplotlib.colors import LinearSegmentedColormap
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+from networkx.drawing import nx_pydot
 
 from pipeline.shared import ensure_list
 
 
-class TopologicalScheduler:
-    def __init__(self, dag, unfinished_tasks, executor="serial", priority=False):
-        if not dag.is_directed():
-            raise nx.NetworkXError("Topological sort not defined on undirected graphs.")
-        self.dag = dag
+BLUE = "#547482"
+YELLOW_TO_RED = ["#C8B05C", "#C89D64", "#F1B05D", "#EE8445", "#C87259", "#6C4A4D"]
 
-        self.unfinished_tasks = unfinished_tasks
+
+class Scheduler:
+    """This class allows to schedule tasks.
+
+    The functionality is inspired by func:`networkx.topological_sort` which allows to
+    loop over a directed acyclic graph such that all preceding nodes are executed before
+    a dependent node.
+
+    The scheduler keeps track of all unfinished tasks and their dependencies in the
+    `task_dict`. If a task has no dependencies, it is eligible to be executed. All
+    submitted tasks are remove from `task_dict`. If a task finishes, it is removed as a
+    dependency from all tasks in `task_dict`.
+
+    The scheduler can take task priorities into account and proposes only tasks
+    with the highest priorities.
+
+    """
+
+    def __init__(self, dag, unfinished_tasks, priority):
+        self.dag = dag
+        self.task_dict = self._create_task_dependency_dict(unfinished_tasks)
         self.submitted_tasks = set()
         self.priority = priority
 
-        if executor not in ["serial", "parallel"]:
-            raise NotImplementedError("The executor can either be serial or parallel.")
-        self.executor = executor
-
-    def _create_task_dependency_dict(self):
+    def _create_task_dependency_dict(self, unfinished_tasks):
         """Create a task-dependency dictionary.
 
         For each unfinished task, this function collects the tasks which have to be
-        executed before it.
+        executed in advance.
 
         """
-        self.task_dict = {}
-        for id_ in self.unfinished_tasks:
-            self.task_dict[id_] = {
+        task_dict = {}
+        for id_ in unfinished_tasks:
+            task_dict[id_] = {
                 preceding_task
                 for dependency in ensure_list(self.dag.nodes[id_].get("depends_on", []))
                 for preceding_task in self.dag.predecessors(dependency)
-                if preceding_task in self.unfinished_tasks
+                if preceding_task in unfinished_tasks
             }
 
+        return task_dict
+
     def propose(self, n_proposals=1):
-        candidates = {
-            id_ for id_ in self.unfinished_tasks if len(self.task_dict[id_]) == 0
-        }
+        """Propose a number of tasks.
 
-        if candidates:
-            if self.executor == "serial":
-                id_ = candidates[0]
-                self.submitted_tasks.add(id_)
+        This function proposes tasks which can be executed. If a task is proposed,
+        remove it from the `task_dict`.
 
-                return set(id_)
-            else:
-                self.submitted_tasks = self.submitted_tasks | candidates
+        Parameters
+        ----------
+        n_proposals : int
+            Number of tasks which should be proposed. For any nonnegative number, return
+            a set of task ids. For `-1` return all possible tasks.
 
-                return candidates
+        Returns
+        -------
+        proposals : set
+            A set of task ids which should be executed.
+
+        """
+        # Get task candidates.
+        candidates = [id_ for id_ in self.task_dict if len(self.task_dict[id_]) == 0]
+        if self.priority:
+            candidates = sorted(
+                candidates,
+                key=lambda id_: self.dag.nodes[id_]["priority"],
+                reverse=True,
+            )
+
+        if 0 <= n_proposals:
+            proposals = set(candidates[:n_proposals])
+
+        elif n_proposals == -1:
+            proposals = set(candidates)
+
         else:
-            n_proposals
+            raise NotImplementedError
 
-    def receive_finished(self, finished_tasks):
+        self.submitted_tasks = self.submitted_tasks.union(proposals)
+
+        for id_ in proposals:
+            del self.task_dict[id_]
+
+        return proposals
+
+    def process_finished(self, finished_tasks):
+        """Process finished tasks.
+
+        The executor passes an id or a list of ids of finished tasks back to the
+        scheduler. The scheduler removes the ids from the set of submitted tasks and
+        removes the finished tasks from the dependency sets of all unfinished tasks in
+        `task_dict`.
+
+        Parameters
+        ----------
+        finished_tasks : str or list
+            An id or a list of ids of finished tasks.
+
+        """
+        finished_tasks = ensure_list(finished_tasks)
         for id_ in finished_tasks:
-            del self.unfinished_tasks[id_]
+            self.submitted_tasks.remove(id_)
+            for id__ in self.task_dict:
+                self.task_dict[id__].discard(id_)
+
+    @property
+    def are_tasks_left(self):
+        return len(self.task_dict) != 0 or len(self.submitted_tasks) != 0
 
 
 def create_dag(tasks, config):
@@ -113,21 +176,27 @@ def _insert_tasks_in_dag(dag, tasks):
 
 
 def _assign_priority_to_nodes(dag, config):
-    """Assign a priority to a node."""
+    """Assign a priority to a node.
+
+    Task priorities trickle down from the last nodes in the DAG to the first nodes. The
+    total priority of a task is its own priority plus the discounted sum of priorities
+    of its targets.
+
+    """
     discount_factor = config["priority_discount_factor"]
     reversed_dag = dag.reverse()
     for id_ in nx.topological_sort(reversed_dag):
-        dag.nodes[id_]["priority"] = dag.nodes[id_].get("priority", 0)
-
-        if config["priority"]:
+        if reversed_dag.nodes[id_]["_is_task"] and config["priority"]:
             sum_priorities = 0
             for pre in reversed_dag.predecessors(id_):
-                dag.nodes[pre]["priority"] = dag.nodes[pre].get("priority", 0)
-                sum_priorities += dag.nodes[pre]["priority"]
+                for pre_task in reversed_dag.predecessors(pre):
+                    sum_priorities += dag.nodes[pre_task].get("priority", 0)
 
             dag.nodes[id_]["priority"] = (
-                dag.nodes[id_]["priority"] + discount_factor * sum_priorities
+                dag.nodes[id_].get("priority", 0) + discount_factor * sum_priorities
             )
+        else:
+            pass
 
     return dag
 
@@ -135,27 +204,52 @@ def _assign_priority_to_nodes(dag, config):
 def _draw_dag(dag, config):
     fig, ax = plt.subplots(figsize=(16, 12))
 
+    fig.suptitle("Task Graph", fontsize=24)
+
     # Relabel absolute paths to path names.
-    mapping = {node: Path(node).name for node in dag.nodes}
+    project_directory = Path(config["project_directory"])
+    mapping = {
+        node: Path(node).relative_to(project_directory)
+        for node in dag.nodes
+        if Path(node).is_absolute()
+    }
     dag = nx.relabel_nodes(dag, mapping)
 
+    layout = nx_pydot.pydot_layout(dag, prog="dot")
+
+    nx.draw_networkx_edges(dag, pos=layout, ax=ax)
+    nx.draw_networkx_labels(dag, pos=layout, ax=ax)
+
+    # Draw non-task nodes.
+    non_task_nodes = [node for node in dag.nodes if not dag.nodes[node]["_is_task"]]
+    nx.draw_networkx_nodes(
+        dag, pos=layout, nodelist=non_task_nodes, node_color=BLUE, ax=ax
+    )
+
+    task_nodes = [node for node in dag.nodes if dag.nodes[node]["_is_task"]]
     if config["priority"]:
-        # Generate node size. By default 300. Squeeze between 300 and 1_300.
-        node_size = np.array([dag.nodes[node]["priority"] for node in dag.nodes])
+        node_size = np.array([dag.nodes[node]["priority"] for node in task_nodes])
         node_size_demeaned = node_size - node_size.min()
         node_size_relative = node_size_demeaned / node_size_demeaned.max()
         node_size = node_size_relative * 1_000 + 300
+
+        cmap = LinearSegmentedColormap.from_list("cmap", YELLOW_TO_RED)
         priority_kwargs = {
             "node_size": node_size,
             "node_color": node_size_relative,
-            "cmap": "coolwarm",
+            "cmap": cmap,
         }
     else:
-        priority_kwargs = {}
+        priority_kwargs = {"node_color": BLUE}
+    im = nx.draw_networkx_nodes(
+        dag, pos=layout, nodelist=task_nodes, **priority_kwargs, ax=ax
+    )
 
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", category=FutureWarning)
-        nx.draw_networkx(dag, layout=nx.random_layout(dag), ax=ax, **priority_kwargs)
+    if config["priority"]:
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="3%", pad=0.1)
+        fig.colorbar(im, cax=cax, orientation="vertical")
+        cax.set_title("Priority")
 
     path = Path(config["hidden_build_directory"], ".dag.png")
     path.parent.mkdir(parents=True, exist_ok=True)

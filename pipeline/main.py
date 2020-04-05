@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from pipeline.dag import create_dag
 from pipeline.execution import execute_dag_parallelly
 from pipeline.execution import execute_dag_serially
@@ -21,15 +19,3 @@ def build_project(config):
         execute_dag_parallelly(dag, env, config)
 
     return dag
-
-
-def _check_for_missing_dependencies(id_, env, dag):
-    for dependency in dag.predecessors(id_):
-        if dependency in env.list_templates():
-            pass
-        else:
-            path = Path(dependency)
-            if not path.exists():
-                raise FileNotFoundError(
-                    f"Dependency '{path.as_posix()}' of task '{id_}' cannot be found."
-                )

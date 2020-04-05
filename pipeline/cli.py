@@ -37,7 +37,9 @@ def collect(config, tasks, templates):
 @cli.command()
 @click.option("--debug", is_flag=True, default=None)
 @click.option("-n", "--n-jobs", default=None, type=int, help="Number of parallel jobs.")
-@click.option("--priority", is_flag=True, help="Schedule tasks by priority.")
+@click.option(
+    "--priority/--no-priority", default=None, help="Schedule tasks by priority."
+)
 def build(debug, n_jobs, priority):
     """Build the project."""
     click.echo("### Build Project")

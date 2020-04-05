@@ -43,12 +43,12 @@ def compare_hashes_of_task(id_, env, dag, config):
     for node in dependencies_and_targets:
         path = Path(node)
 
-        if path.exists() or node in env.list_templates():
-            if path.exists():
-                hash_ = _compute_hash_of_file(path, path.stat().st_mtime)
-            else:
+        if node in env.list_templates() or path.exists():
+            if node in env.list_templates():
                 rendered_task = render_task_template(id_, dag.nodes[id_], env, config)
                 hash_ = _compute_hash_of_string(rendered_task)
+            else:
+                hash_ = _compute_hash_of_file(path, path.stat().st_mtime)
 
             if hash_ == hashes[id_].get(node, None):
                 pass
@@ -70,11 +70,14 @@ def save_hashes_of_task_dependencies(id_, env, dag, config):
     hashes = _load_hashes(config)
     for dependency in dag.predecessors(id_):
         if dependency in env.list_templates():
-            pass
+            rendered_task = render_task_template(id_, dag.nodes[id_], env, config)
+            hash_ = _compute_hash_of_string(rendered_task)
         else:
             path = Path(dependency)
             hash_ = _compute_hash_of_file(path, path.stat().st_mtime)
-            hashes[id_][dependency] = hash_
+
+        hashes[id_] = hashes.get(id_, {})
+        hashes[id_][dependency] = hash_
 
     _dump_hashes(hashes, config)
 

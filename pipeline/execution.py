@@ -8,6 +8,7 @@ import click
 import networkx as nx
 from tqdm import tqdm
 
+from pipeline.dag import Scheduler
 from pipeline.exceptions import TaskError
 from pipeline.hashing import compare_hashes_of_task
 from pipeline.hashing import save_hash_of_task_target
@@ -52,67 +53,66 @@ def execute_dag_serially(dag, env, config):
 
     """
     unfinished_tasks = _collect_unfinished_tasks(dag, env, config)
-    len_task_names = list(map(len, unfinished_tasks))
-    prevent_task_description_from_moving = max(len_task_names) if len_task_names else 0
+
+    padding = _compute_padding_to_prevent_task_description_from_moving(unfinished_tasks)
+
+    scheduler = Scheduler(dag, unfinished_tasks, config["priority"])
 
     with tqdm(total=len(unfinished_tasks), bar_format=TQDM_BAR_FORMAT) as t:
-        for id_ in nx.topological_sort(dag):
-            if id_ in unfinished_tasks:
-                t.set_description(id_.ljust(prevent_task_description_from_moving))
+        while scheduler.are_tasks_left:
+            id_ = scheduler.propose().pop()
 
+            t.set_description(id_.ljust(padding))
+
+            save_hashes_of_task_dependencies(id_, env, dag, config)
+
+            path = _preprocess_task(id_, dag, env, config)
+
+            _ = _execute_task(id_, path, config["_is_debug"])
+
+            _process_task_target(id_, dag, config)
+
+            scheduler.process_finished(id_)
+
+            t.update()
+
+
+def execute_dag_parallelly(dag, env, config):
+    n_jobs = config["n_jobs"]
+
+    unfinished_tasks = _collect_unfinished_tasks(dag, env, config)
+
+    padding = _compute_padding_to_prevent_task_description_from_moving(unfinished_tasks)
+
+    scheduler = Scheduler(dag, unfinished_tasks, config["priority"])
+    submitted_tasks = {}
+
+    with tqdm(
+        total=len(unfinished_tasks), bar_format=TQDM_BAR_FORMAT,
+    ) as t, ProcessPoolExecutor(n_jobs) as executor:
+        while scheduler.are_tasks_left:
+            # Add new tasks to the queue.
+            n_proposals = (
+                n_jobs - sum(not task.done() for task in submitted_tasks.values())
+                if config["priority"]
+                else -1
+            )
+            proposals = scheduler.propose(n_proposals)
+
+            for id_ in ensure_list(proposals):
                 save_hashes_of_task_dependencies(id_, env, dag, config)
 
                 path = _preprocess_task(id_, dag, env, config)
 
-                _ = _execute_task(id_, path, config["_is_debug"])
+                future = executor.submit(_execute_task, id_, path, config["_is_debug"])
+                future.add_done_callback(lambda x: t.update())
+                submitted_tasks[id_] = future
 
-                _process_task_target(id_, dag, config)
-
-                t.update()
-
-
-def execute_dag_parallelly(dag, env, config):
-    unfinished_tasks = _collect_unfinished_tasks(dag, env, config)
-    finished_tasks = {id_ for id_ in dag.nodes if id_ not in unfinished_tasks}
-    len_task_names = list(map(len, unfinished_tasks))
-    prevent_task_description_from_moving = max(len_task_names) if len_task_names else 0
-
-    with tqdm(
-        total=len(unfinished_tasks), bar_format=TQDM_BAR_FORMAT,
-    ) as t, ProcessPoolExecutor(config["n_jobs"]) as executor:
-
-        are_tasks_left = len(unfinished_tasks) != 0
-        submitted_tasks = {}
-
-        while are_tasks_left:
-            # Submit new tasks.
-            for id_ in unfinished_tasks:
-                deps = [
-                    predecessor
-                    for dependency in ensure_list(dag.nodes[id_].get("depends_on", []))
-                    for predecessor in dag.predecessors(dependency)
-                ]
-                all_dependencies_executed = all(dep in finished_tasks for dep in deps)
-                if all_dependencies_executed:
-                    save_hashes_of_task_dependencies(id_, env, dag, config)
-
-                    path = _preprocess_task(id_, dag, env, config)
-
-                    future = executor.submit(
-                        _execute_task, id_, path, config["_is_debug"]
-                    )
-                    future.add_done_callback(lambda x: t.update())
-                    submitted_tasks[id_] = future
-
-                    t.set_description(id_.ljust(prevent_task_description_from_moving))
-                else:
-                    pass
+                t.set_description(id_.ljust(padding))
 
             # Evaluate finished tasks.
             newly_finished_tasks = {
-                id_
-                for id_, task in submitted_tasks.items()
-                if task.done() and id_ not in finished_tasks
+                id_ for id_, task in submitted_tasks.items() if task.done()
             }
 
             # Check for exceptions.
@@ -126,10 +126,9 @@ def execute_dag_parallelly(dag, env, config):
 
             for id_ in newly_finished_tasks:
                 _process_task_target(id_, dag, config)
+                del submitted_tasks[id_]
 
-            finished_tasks = finished_tasks.union(newly_finished_tasks)
-            unfinished_tasks = unfinished_tasks - finished_tasks - set(submitted_tasks)
-            are_tasks_left = len(unfinished_tasks) != 0
+            scheduler.process_finished(newly_finished_tasks)
 
             # A little bit of sleep time to wait for tasks to finish.
             time.sleep(0.1)
@@ -164,6 +163,13 @@ def _collect_unfinished_tasks(dag, env, config):
                         unfinished_tasks.add(descendant)
 
     return unfinished_tasks
+
+
+def _compute_padding_to_prevent_task_description_from_moving(unfinished_tasks):
+    len_task_names = list(map(len, unfinished_tasks))
+    padding = max(len_task_names) if len_task_names else 0
+
+    return padding
 
 
 def _preprocess_task(id_, dag, env, config):

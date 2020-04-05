@@ -4,7 +4,7 @@ from pipeline._yaml import read_yaml
 from pipeline.shared import ensure_list
 
 
-def load_config(debug=False, n_jobs=1, priority=False, config=None):
+def load_config(debug=None, n_jobs=None, priority=None, config=None):
     if config is None:
         path = Path.cwd() / ".pipeline.yaml"
 
@@ -31,11 +31,12 @@ def load_config(debug=False, n_jobs=1, priority=False, config=None):
         for path in custom_templates_dirs
     ]
 
-    config["_is_debug"] = debug
+    config["_is_debug"] = debug if debug is not None else False
 
     config["globals"] = config.get("globals", {})
 
-    config["priority"] = priority
+    config["priority"] = config.get("priority", False) if priority is None else priority
+
     config["priority_discount_factor"] = config.get("priority_discount_factor", 1)
 
     if config["_is_debug"]:
