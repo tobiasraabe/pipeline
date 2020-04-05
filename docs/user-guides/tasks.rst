@@ -2,6 +2,8 @@
 Tasks
 =====
 
+.. _tasks_basics:
+
 Basics
 ------
 
@@ -145,7 +147,7 @@ The Jinja documentation offers exhaustive resources on this topic which can be f
   statements.
 
 
-.. _custom_variables:
+.. _tasks_custom_variables:
 
 Custom variables in templates
 -----------------------------
@@ -171,7 +173,7 @@ and inside the template there exist a function with
         np.random.seed({{seed}})
 
 
-.. _global_variables_in_tasks_and_templates:
+.. _tasks_global_variables_in_tasks_and_templates:
 
 Global variables in tasks and templates
 ---------------------------------------
