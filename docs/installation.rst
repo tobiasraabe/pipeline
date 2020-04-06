@@ -4,9 +4,8 @@ Installation
 
 .. Synchronize with README.rst!
 
-**pipeline** is available on `Anaconda.org
-<https://anaconda.org/OpenSourceEconomics/pipeline>`_. Use the following command for
-installation.
+**pipeline** is available on `Anaconda.org <https://anaconda.org/OpenSourceEconomics/
+pipeline>`_. Install the package with
 
 .. code-block:: bash
 
