@@ -2,9 +2,8 @@
 Task priorities
 ===============
 
-*An example for a similar workflow is available as a `demo workflow
-<https://github.com/OpenSourceEconomics/pipeline-demo-project/tree/master/
-priority-scheduling>`_.*
+A similar workflow is available as a `demo project <https://github.com/
+OpenSourceEconomics/pipeline-demo-project/tree/master/priority-scheduling>`_.
 
 With **pipeline** you are able to assign priorities to tasks such that the execution of
 tasks with higher priorities is preferred over tasks with lower priority.
@@ -28,7 +27,7 @@ To overcome this problem, you can assign task priorities. There are two ways to 
 First, you can assign a priority to each individual task in the ``.yaml`` files. A task
 definition might look like this:
 
-.. code-block::
+.. code-block:: jinja
 
     {% for i in range(n_trials) %}
 
@@ -67,7 +66,7 @@ additional and more convenient solution. Ultimately, you are interested in the
 distribution of statistics. So, we put a priority of 1 on the last task which plots the
 distribution.
 
-.. code-block::
+.. code-block:: jinja
 
     plot-distribution:
       template: plot_distribution.py
@@ -89,7 +88,7 @@ trickle down the task graph. Unfortunately, every task has a priority of one in 
 and we have no priorities. Here is workflow of the remaining three tasks with implicit
 priorities in round brackets.
 
-.. code-block::
+.. code-block:: jinja
 
     {% for i in range(n_trials) %}
 
@@ -117,7 +116,7 @@ Thus, the user is able to set a discount factor. Task priorities are now calcula
 where :math:`\delta` is the discount factor. If the discount factor is set to 0.5 and we
 assign a priority of 1 to the last task, the implicit priorities are
 
-.. code-block::
+.. code-block:: jinja
 
     {% for i in range(n_trials) %}
 

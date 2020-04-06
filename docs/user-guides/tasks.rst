@@ -63,7 +63,8 @@ path. In the file ``simulate_data.py``, change the following call:
     df.to_csv("{{ produces }}")  # new
 
 Now, **pipeline** will inject its own output path. But, how can you link following tasks
-to a task target whose exact location is unknown to you? Next section.
+to a task target whose exact location is unknown to you? Find out about it in the next
+section.
 
 
 Declaring dependencies
@@ -156,7 +157,7 @@ All variables variables defined in a task dictionary are available in the templa
 For example, a data set should be generated with multiple seeds, then the task may look
 like
 
-.. code-block::
+.. code-block:: jinja
 
     {% for i in range(10) %}
     create-random-data-{{ i }}:
@@ -187,7 +188,7 @@ duplication.
 To overcome this issue, use :ref:`global variables inside the project configuration
 <configuration_globals>`. It is a dictionary and maybe used like this:
 
-.. code-block::
+.. code-block:: jinja
 
     {% for dependent_variable in globals['dependent_variables'] %}
         ...

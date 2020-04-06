@@ -32,6 +32,8 @@ value inside ``.pipeline.yaml``. For example, to change the ``build_directory``,
 
 .. code-block:: yaml
 
+    # .pipeline.yaml
+
     build_directory: build
 
 which will be interpreted as a relative path to the project directory or the
