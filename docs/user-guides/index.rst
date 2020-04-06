@@ -8,4 +8,5 @@ User Guides
    configuration
    tasks
    estimations
+   task-priorities
    debugging

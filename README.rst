@@ -126,5 +126,5 @@ Getting Started
 ---------------
 
 To get started with **pipeline**, please visit the `documentation
-<https://pipeline-wp.readthedocs.io/>`_ or the `sample project
+<https://pipeline-wp.readthedocs.io/>`_ or the `sample projects
 <https://github.com/OpenSourceEconomics/pipeline-demo-project>`_.

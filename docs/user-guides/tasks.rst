@@ -194,6 +194,14 @@ To overcome this issue, use :ref:`global variables inside the project configurat
     {% endfor %}
 
 
+Task priorities
+---------------
+
+Tasks can have a priority such that their execution is preferred or deferred compared to
+other tasks. Use ``priority`` in the task definition to set a task priority. For a more
+comprehensive introduction, see :doc:`task-priorities`.
+
+
 Forbidden Keys
 --------------
 
