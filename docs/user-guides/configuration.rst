@@ -32,6 +32,8 @@ value inside ``.pipeline.yaml``. For example, to change the ``build_directory``,
 
 .. code-block:: yaml
 
+    # .pipeline.yaml
+
     build_directory: build
 
 which will be interpreted as a relative path to the project directory or the
@@ -92,7 +94,7 @@ and define a dictionary of named variables.
       dependent_variables: [y1, y2, y3]
 
 If you want to know how to use them inside tasks and templates, see
-:ref:`global_variables_in_tasks_and_templates`.
+:ref:`tasks_global_variables_in_tasks_and_templates`.
 
-Note that a :ref:`custom variable <custom_variables>` called ``globals`` in the tasks
-templates has precedence.
+Note that a :ref:`custom variable <tasks_custom_variables>` called ``globals`` in the
+tasks templates has precedence.

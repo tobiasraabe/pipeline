@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 
 import pytest
@@ -5,8 +6,8 @@ import yaml
 
 
 @pytest.fixture(scope="function")
-def test_project_config(tmpdir_factory):
-    project_path = Path(tmpdir_factory.mktemp("project"))
+def test_project_config(tmp_path_factory):
+    project_path = Path(tmp_path_factory.mktemp("project"))
 
     config = {
         "project_directory": project_path.as_posix(),
@@ -16,4 +17,11 @@ def test_project_config(tmpdir_factory):
 
     project_path.joinpath(".pipeline.yaml").write_text(yaml.dump(config))
 
-    return config
+    yield config
+
+    files_and_folders = project_path.glob("*")
+    for file_or_folder in files_and_folders:
+        if file_or_folder.is_dir():
+            shutil.rmtree(file_or_folder)
+        else:
+            file_or_folder.unlink()

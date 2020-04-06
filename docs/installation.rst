@@ -2,11 +2,10 @@
 Installation
 ============
 
-.. Same as in README.rst.
+.. Synchronize with README.rst!
 
-**pipeline** is available on `Anaconda.org
-<https://anaconda.org/OpenSourceEconomics/pipeline>`_. Use the following command for
-installation.
+**pipeline** is available on `Anaconda.org <https://anaconda.org/OpenSourceEconomics/
+pipeline>`_. Install the package with
 
 .. code-block:: bash
 
@@ -22,4 +21,4 @@ If you plan to use R templates as well, type
                     r-tidyverse r-xtable
 
 to get started with the minimum of packages. It is important that you do not use the
-third version of ``rpy2`` on Windows.
+third version of rpy2 on `Windows` as it is not supported.

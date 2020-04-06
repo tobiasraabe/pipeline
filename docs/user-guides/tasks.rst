@@ -2,6 +2,8 @@
 Tasks
 =====
 
+.. _tasks_basics:
+
 Basics
 ------
 
@@ -61,7 +63,8 @@ path. In the file ``simulate_data.py``, change the following call:
     df.to_csv("{{ produces }}")  # new
 
 Now, **pipeline** will inject its own output path. But, how can you link following tasks
-to a task target whose exact location is unknown to you? Next section.
+to a task target whose exact location is unknown to you? Find out about it in the next
+section.
 
 
 Declaring dependencies
@@ -145,7 +148,7 @@ The Jinja documentation offers exhaustive resources on this topic which can be f
   statements.
 
 
-.. _custom_variables:
+.. _tasks_custom_variables:
 
 Custom variables in templates
 -----------------------------
@@ -154,7 +157,7 @@ All variables variables defined in a task dictionary are available in the templa
 For example, a data set should be generated with multiple seeds, then the task may look
 like
 
-.. code-block::
+.. code-block:: jinja
 
     {% for i in range(10) %}
     create-random-data-{{ i }}:
@@ -171,7 +174,7 @@ and inside the template there exist a function with
         np.random.seed({{seed}})
 
 
-.. _global_variables_in_tasks_and_templates:
+.. _tasks_global_variables_in_tasks_and_templates:
 
 Global variables in tasks and templates
 ---------------------------------------
@@ -185,11 +188,19 @@ duplication.
 To overcome this issue, use :ref:`global variables inside the project configuration
 <configuration_globals>`. It is a dictionary and maybe used like this:
 
-.. code-block::
+.. code-block:: jinja
 
     {% for dependent_variable in globals['dependent_variables'] %}
         ...
     {% endfor %}
+
+
+Task priorities
+---------------
+
+Tasks can have a priority such that their execution is preferred or deferred compared to
+other tasks. Use ``priority`` in the task definition to set a task priority. For a more
+comprehensive introduction, see :doc:`task-priorities`.
 
 
 Forbidden Keys

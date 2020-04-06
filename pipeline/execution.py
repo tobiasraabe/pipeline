@@ -5,15 +5,16 @@ from concurrent.futures.process import ProcessPoolExecutor
 from pathlib import Path
 
 import click
-import jinja2
 import networkx as nx
 from tqdm import tqdm
 
+from pipeline.dag import Scheduler
 from pipeline.exceptions import TaskError
+from pipeline.hashing import compare_hashes_of_task
 from pipeline.hashing import save_hash_of_task_target
 from pipeline.hashing import save_hashes_of_task_dependencies
 from pipeline.shared import ensure_list
-
+from pipeline.shared import render_task_template
 
 try:
     import rpy2
@@ -34,70 +35,84 @@ else:
 TQDM_BAR_FORMAT = "{l_bar}{bar}|{n_fmt}/{total_fmt} tasks in {elapsed}"
 
 
-def execute_dag_serially(dag, tasks, env, config):
-    """Naive serial scheduler for our tasks."""
-    unfinished_tasks = [id_ for id_ in tasks if tasks[id_]["_needs_to_be_executed"]]
-    len_task_names = list(map(len, unfinished_tasks))
-    prevent_task_description_from_moving = max(len_task_names) if len_task_names else 0
+def execute_dag_serially(dag, env, config):
+    """Execute the DAG serially.
+
+    This function executes the tasks ordered topological which means it is an ordering
+    which ensures that a node is only visited if all of its preceding nodes are visited
+    before.
+
+    Parameters
+    ----------
+    dag : nx.DiGraph
+        The DAG containing the complete workflow.
+    env : jinja2.Environment
+        An environment which manages the templates.
+    config : dict
+        The workflow configuration.
+
+    """
+    unfinished_tasks = _collect_unfinished_tasks(dag, env, config)
+
+    padding = _compute_padding_to_prevent_task_description_from_moving(unfinished_tasks)
+
+    scheduler = Scheduler(dag, unfinished_tasks, config["priority"])
 
     with tqdm(total=len(unfinished_tasks), bar_format=TQDM_BAR_FORMAT) as t:
-        for id_ in nx.topological_sort(dag):
-            if id_ in unfinished_tasks:
-                t.set_description(id_.ljust(prevent_task_description_from_moving))
+        while scheduler.are_tasks_left:
+            id_ = scheduler.propose().pop()
 
-                save_hashes_of_task_dependencies(id_, env, dag, config)
+            t.set_description(id_.ljust(padding))
 
-                path = _preprocess_task(id_, tasks, env, config)
+            save_hashes_of_task_dependencies(id_, env, dag, config)
 
-                _ = _execute_task(id_, path, config["is_debug"])
+            path = _preprocess_task(id_, dag, env, config)
 
-                _process_task_target(id_, tasks, config)
+            _ = _execute_task(id_, path, config["_is_debug"])
 
-                t.update()
+            _process_task_target(id_, dag, config)
+
+            scheduler.process_finished(id_)
+
+            t.update()
 
 
-def execute_dag_parallelly(dag, tasks, env, config):
-    unfinished_tasks = {id_ for id_ in tasks if tasks[id_]["_needs_to_be_executed"]}
-    finished_tasks = {id_ for id_ in tasks if id_ not in unfinished_tasks}
-    len_task_names = list(map(len, unfinished_tasks))
-    prevent_task_description_from_moving = max(len_task_names) if len_task_names else 0
+def execute_dag_parallelly(dag, env, config):
+    n_jobs = config["n_jobs"]
+
+    unfinished_tasks = _collect_unfinished_tasks(dag, env, config)
+
+    padding = _compute_padding_to_prevent_task_description_from_moving(unfinished_tasks)
+
+    scheduler = Scheduler(dag, unfinished_tasks, config["priority"])
+    submitted_tasks = {}
 
     with tqdm(
         total=len(unfinished_tasks), bar_format=TQDM_BAR_FORMAT,
-    ) as t, ProcessPoolExecutor(config["n_jobs"]) as executor:
+    ) as t, ProcessPoolExecutor(n_jobs) as executor:
+        while scheduler.are_tasks_left:
+            # Add new tasks to the queue.
+            n_proposals = (
+                n_jobs - sum(not task.done() for task in submitted_tasks.values())
+                if config["priority"]
+                else -1
+            )
+            proposals = scheduler.propose(n_proposals)
 
-        are_tasks_left = len(unfinished_tasks) != 0
-        submitted_tasks = {}
+            for id_ in ensure_list(proposals):
+                save_hashes_of_task_dependencies(id_, env, dag, config)
 
-        while are_tasks_left:
-            # Submit new tasks.
-            for id_ in unfinished_tasks:
-                deps = [
-                    predecessor
-                    for dependency in ensure_list(tasks[id_].get("depends_on", []))
-                    for predecessor in dag.predecessors(dependency)
-                ]
-                all_dependencies_executed = all(dep in finished_tasks for dep in deps)
-                if all_dependencies_executed:
-                    save_hashes_of_task_dependencies(id_, env, dag, config)
+                path = _preprocess_task(id_, dag, env, config)
 
-                    path = _preprocess_task(id_, tasks, env, config)
+                future = executor.submit(_execute_task, id_, path, config["_is_debug"])
+                future.add_done_callback(lambda x: t.update())
+                submitted_tasks[id_] = future
 
-                    future = executor.submit(
-                        _execute_task, id_, path, config["is_debug"]
-                    )
-                    future.add_done_callback(lambda x: t.update())
-                    submitted_tasks[id_] = future
-
-                    t.set_description(id_.ljust(prevent_task_description_from_moving))
-                else:
-                    pass
+                t.set_description(id_.ljust(padding))
 
             # Evaluate finished tasks.
             newly_finished_tasks = {
-                id_
-                for id_, task in submitted_tasks.items()
-                if task.done() and id_ not in finished_tasks
+                id_ for id_, task in submitted_tasks.items() if task.done()
             }
 
             # Check for exceptions.
@@ -110,28 +125,65 @@ def execute_dag_parallelly(dag, tasks, env, config):
                 raise TaskError("\n\n".join(exceptions))
 
             for id_ in newly_finished_tasks:
-                _process_task_target(id_, tasks, config)
+                _process_task_target(id_, dag, config)
+                del submitted_tasks[id_]
 
-            finished_tasks = finished_tasks.union(newly_finished_tasks)
-            unfinished_tasks = unfinished_tasks - finished_tasks - set(submitted_tasks)
-            are_tasks_left = len(unfinished_tasks) != 0
+            scheduler.process_finished(newly_finished_tasks)
 
             # A little bit of sleep time to wait for tasks to finish.
             time.sleep(0.1)
 
 
-def _preprocess_task(id_, tasks, env, config):
-    file = _render_task_template(id_, tasks[id_], env, config)
+def _collect_unfinished_tasks(dag, env, config):
+    """Collect unfinished tasks.
 
-    if "produces" in tasks[id_]:
-        Path(tasks[id_]["produces"]).parent.mkdir(parents=True, exist_ok=True)
+    Iterate over topological sorted nodes in the DAG. If the node is a task, compare the
+    hashes of all dependencies and targets. If the hashes do not match, add the task to
+    the set of unfinished tasks. After that, go through the whole list of descendants of
+    the task and mark all tasks among them as unfinished, too.
 
-    if tasks[id_]["template"].endswith(".py"):
+    Parameters
+    ----------
+    dag : nx.DiGraph
+        The DAG containing the complete workflow.
+    env : jinja2.Environment
+        An environment which manages the templates.
+    config : dict
+        The workflow configuration.
+
+    """
+    unfinished_tasks = set()
+    for id_ in nx.topological_sort(dag):
+        if dag.nodes[id_]["_is_task"] and id_ not in unfinished_tasks:
+            have_same_hashes = compare_hashes_of_task(id_, env, dag, config)
+            if not have_same_hashes:
+                unfinished_tasks.add(id_)
+                for descendant in nx.descendants(dag, id_):
+                    if dag.nodes[descendant]["_is_task"]:
+                        unfinished_tasks.add(descendant)
+
+    return unfinished_tasks
+
+
+def _compute_padding_to_prevent_task_description_from_moving(unfinished_tasks):
+    len_task_names = list(map(len, unfinished_tasks))
+    padding = max(len_task_names) if len_task_names else 0
+
+    return padding
+
+
+def _preprocess_task(id_, dag, env, config):
+    file = render_task_template(id_, dag.nodes[id_], env, config)
+
+    if "produces" in dag.nodes[id_]:
+        Path(dag.nodes[id_]["produces"]).parent.mkdir(parents=True, exist_ok=True)
+
+    if dag.nodes[id_]["template"].endswith(".py"):
         path = Path(config["hidden_task_directory"], id_ + ".py")
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(file)
 
-    elif tasks[id_]["template"].endswith(".r"):
+    elif dag.nodes[id_]["template"].endswith(".r"):
         path = Path(config["hidden_task_directory"], id_ + ".r")
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(file)
@@ -180,24 +232,14 @@ def _format_exception_message(id_, path, e):
     return f"\n\nTask '{id_}' in file '{path}' failed.\n\n{exc_info}"
 
 
-def _process_task_target(id_, tasks, config):
-    path = Path(tasks[id_]["produces"])
-    if not path.exists():
+def _process_task_target(id_, dag, config):
+    """Process the target of the task."""
+    targets = ensure_list(dag.nodes[id_]["produces"])
+    missing_targets = [
+        Path(target).as_posix() for target in targets if not Path(target).exists()
+    ]
+    if missing_targets:
         raise FileNotFoundError(
-            f"Target '{path.as_posix()}' was not produced by task '{id_}'."
+            f"Target(s) '{missing_targets}' was(were) not produced by task '{id_}'."
         )
-    save_hash_of_task_target(id_, tasks, config)
-
-
-def _render_task_template(id_, task_info, env, config):
-    """Compile the file of the task."""
-    template = env.get_template(task_info["template"])
-
-    try:
-        rendered_template = template.render(globals=config["globals"], **task_info)
-    except jinja2.exceptions.UndefinedError as e:
-        raise jinja2.exceptions.UndefinedError(
-            f"Task '{id_}' has an undefined variable."
-        ).with_traceback(e.__traceback__)
-    else:
-        return rendered_template
+    save_hash_of_task_target(id_, dag, config)

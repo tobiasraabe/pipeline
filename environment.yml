@@ -15,8 +15,10 @@ dependencies:
   - jupyterlab
   - matplotlib
   - networkx
+  - numpydoc
   - pandas
   - pre-commit
+  - pydot
   - pytest
   - pytest-cov
   - pyyaml
