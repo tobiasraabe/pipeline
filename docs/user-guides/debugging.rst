@@ -16,7 +16,8 @@ standard Python debugger ``pdb``. Check it out, especially the sticky mode.
 The ``debug`` flag
 ------------------
 
-For Python tasks, it is possible to jump into the debugger if a task raises an error with the debug flag. Add it to build command by typing
+For Python tasks, it is possible to jump into the debugger if a task raises an error
+with the debug flag. Add it to build command by typing
 
 .. code-block:: bash
 
