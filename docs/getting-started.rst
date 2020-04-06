@@ -111,3 +111,11 @@ directed acyclic graph (DAG).
 If a task throws and error, you might, apart from debugging, want to take a look at the
 ``bld/.tasks`` folder which contains the compiled task template. You might find an error
 while expecting this file.
+
+
+Demo projects
+-------------
+
+**pipeline** is tested on some demo projects which are also a good starting point for
+beginners. You can find them under
+https://github.com/OpenSourceEconomics/pipeline-demo-project.

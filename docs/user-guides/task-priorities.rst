@@ -2,6 +2,10 @@
 Task priorities
 ===============
 
+*An example for a similar workflow is available as a `demo workflow
+<https://github.com/OpenSourceEconomics/pipeline-demo-project/tree/master/
+priority-scheduling>`_.*
+
 With **pipeline** you are able to assign priorities to tasks such that the execution of
 tasks with higher priorities is preferred over tasks with lower priority.
 
