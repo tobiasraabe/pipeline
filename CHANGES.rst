@@ -13,7 +13,6 @@ releases are available on `Anaconda.org
 - Added task scheduling with priorities for serial and parallel workflows (:gh:`4`).
 - More documentation (:gh:`4`).
 - Changes in rendered task templates cause a task to re-run (:gh:`4`).
--
 
 
 0.0.3 - 2020-03-31
