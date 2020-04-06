@@ -6,7 +6,8 @@ With **pipeline** you are able to assign priorities to tasks such that the execu
 tasks with higher priorities is preferred over tasks with lower priority.
 
 This feature was designed with task queues for complex bootstraps or Monte Carlo
-simulations in mind. Given that the necessary number of trials is unknown prior to the analysis, it is necessary to start, resume, and add more tasks to the task queue.
+simulations in mind. Given that the necessary number of trials is unknown prior to the
+analysis, it is necessary to start, resume, and add more tasks to the task queue.
 
 As an example, let us assume you want to compute the confidence intervals for
 coefficients of an OLS regression with case resampling bootstrap. To acquire the
@@ -20,9 +21,10 @@ are needed, it might be the case that you have not run many regressions, but alr
 sampled more data sets than necessary.
 
 To overcome this problem, you can assign task priorities. There are two ways to do this.
-First, you can assign a priority to each individual task in the ``.yaml`` files. A task definition might look like this:
+First, you can assign a priority to each individual task in the ``.yaml`` files. A task
+definition might look like this:
 
-.. code-block:: yaml
+.. code-block::
 
     {% for i in range(n_trials) %}
 
@@ -61,7 +63,7 @@ additional and more convenient solution. Ultimately, you are interested in the
 distribution of statistics. So, we put a priority of 1 on the last task which plots the
 distribution.
 
-.. code-block:: yaml
+.. code-block::
 
     plot-distribution:
       template: plot_distribution.py
@@ -83,7 +85,7 @@ trickle down the task graph. Unfortunately, every task has a priority of one in 
 and we have no priorities. Here is workflow of the remaining three tasks with implicit
 priorities in round brackets.
 
-.. code-block:: yaml
+.. code-block::
 
     {% for i in range(n_trials) %}
 
@@ -108,9 +110,10 @@ Thus, the user is able to set a discount factor. Task priorities are now calcula
 
 .. math:: P_i = p_i + \delta \sum_j P_j
 
-where :math:`\delta` is the discount factor. If the discount factor is set to 0.5 and we assign a priority of 1 to the last task, the implicit priorities are
+where :math:`\delta` is the discount factor. If the discount factor is set to 0.5 and we
+assign a priority of 1 to the last task, the implicit priorities are
 
-.. code-block:: yaml
+.. code-block::
 
     {% for i in range(n_trials) %}
 
