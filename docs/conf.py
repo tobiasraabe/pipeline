@@ -50,7 +50,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 extlinks = {
     "ghuser": ("https://github.com/%s", "@"),
-    "gh": ("https://github.com/OpenSourceEconomics/respy/pulls/%s", "#"),
+    "gh": ("https://github.com/OpenSourceEconomics/pipeline/pulls/%s", "#"),
 }
 
 intersphinx_mapping = {

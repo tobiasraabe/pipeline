@@ -60,7 +60,7 @@ pipeline>`_. Install the package with
 .. code-block:: bash
 
     $ conda config --add channels conda-forge
-    $ conda install -c opensourceeconomics respy
+    $ conda install -c opensourceeconomics pipeline
 
 If you plan to use R templates as well, type
 
