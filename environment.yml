@@ -17,6 +17,7 @@ dependencies:
   - networkx
   - numpydoc
   - pandas
+  - pony
   - pre-commit
   - pydot
   - pytest

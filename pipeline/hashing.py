@@ -2,13 +2,14 @@ import functools
 import hashlib
 from pathlib import Path
 
-import yaml
+from pony import orm
 
-from pipeline._yaml import read_yaml
+from pipeline.database import Hash
 from pipeline.shared import ensure_list
 from pipeline.shared import render_task_template
 
 
+@orm.db_session
 def compare_hashes_of_task(id_, env, dag, config):
     """Compare hashes of dependencies and targets of a task.
 
@@ -34,9 +35,6 @@ def compare_hashes_of_task(id_, env, dag, config):
         ``True`` if the hashes of all dependencies and targets match else ``False``
 
     """
-    hashes = _load_hashes(config)
-    hashes[id_] = hashes.get(id_, {})
-
     have_same_hashes = True
 
     dependencies_and_targets = list(dag.predecessors(id_)) + list(dag.successors(id_))
@@ -50,24 +48,25 @@ def compare_hashes_of_task(id_, env, dag, config):
             else:
                 hash_ = _compute_hash_of_file(path, path.stat().st_mtime)
 
-            if hash_ == hashes[id_].get(node, None):
-                pass
-
-            else:
+            try:
+                hash_in_db = Hash[id_, node]
+                assert hash_ == hash_in_db.hash
+            except orm.ObjectNotFound:
+                Hash(task=id_, dependency=node, hash_=hash_)
                 have_same_hashes = False
-                hashes[id_][node] = hash_
+            except AssertionError:
+                hash_in_db.hash = hash_
+                have_same_hashes = False
 
         else:
             have_same_hashes = False
 
-    _dump_hashes(hashes, config)
-
     return have_same_hashes
 
 
+@orm.db_session
 def save_hashes_of_task_dependencies(id_, env, dag, config):
     """Save file hashes of the dependencies of a task."""
-    hashes = _load_hashes(config)
     for dependency in dag.predecessors(id_):
         if dependency in env.list_templates():
             rendered_task = render_task_template(id_, dag.nodes[id_], env, config)
@@ -76,51 +75,27 @@ def save_hashes_of_task_dependencies(id_, env, dag, config):
             path = Path(dependency)
             hash_ = _compute_hash_of_file(path, path.stat().st_mtime)
 
-        hashes[id_] = hashes.get(id_, {})
-        hashes[id_][dependency] = hash_
+        try:
+            hash_in_db = Hash[id_, dependency]
+        except orm.ObjectNotFound:
+            Hash(task=id_, dependency=dependency, hash_=hash_)
+        else:
+            hash_in_db.hash = hash_
 
-    _dump_hashes(hashes, config)
 
-
-def save_hash_of_task_target(id_, dag, config):
+@orm.db_session
+def save_hash_of_task_target(id_, dag):
     """Loop over the targets of a task and save the hashes of the files."""
-    hashes = _load_hashes(config)
-
     for string_path in ensure_list(dag.nodes[id_]["produces"]):
         path = Path(string_path)
         hash_ = _compute_hash_of_file(path, path.stat().st_mtime)
-        hashes[id_][string_path] = hash_
 
-    _dump_hashes(hashes, config)
-
-
-def _load_hashes(config):
-    """Load the hashes from disk."""
-    path = Path(config["hidden_build_directory"], ".hashes.yaml")
-    hashes = _load_hashes_helper(path, path.stat().st_mtime) if path.exists() else None
-    hashes = {} if hashes is None else hashes
-
-    return hashes
-
-
-@functools.lru_cache()  # noqa: U101
-def _load_hashes_helper(path, _last_modified):
-    """Load the hashes from disk while caching.
-
-    The function :func:`functools.lru_cache` caches the results of a function depending
-    on the function inputs. To read the file only if the content has changed, pass the
-    point in time when file was last modified as an argument. Although unused by the
-    function itself, ``_last_modified`` ensures that hashes are loaded from cache if the
-    file has not been modified between to requests.
-
-    """
-    return read_yaml(path.read_text())
-
-
-def _dump_hashes(hashes, config):
-    """Dump hashes to disk."""
-    path = Path(config["hidden_build_directory"], ".hashes.yaml")
-    path.write_text(yaml.dump(hashes))
+        try:
+            hash_in_db = Hash[id_, string_path]
+        except orm.ObjectNotFound:
+            Hash(task=id_, dependency=string_path, hash_=hash_)
+        else:
+            hash_in_db.hash = hash_
 
 
 @functools.lru_cache()  # noqa: U101

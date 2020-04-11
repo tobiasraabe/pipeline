@@ -70,7 +70,7 @@ def execute_dag_serially(dag, env, config):
 
             _ = _execute_task(id_, path, config["_is_debug"])
 
-            _process_task_target(id_, dag, config)
+            _process_task_target(id_, dag)
 
             scheduler.process_finished(id_)
 
@@ -125,7 +125,7 @@ def execute_dag_parallelly(dag, env, config):
                 raise TaskError("\n\n".join(exceptions))
 
             for id_ in newly_finished_tasks:
-                _process_task_target(id_, dag, config)
+                _process_task_target(id_, dag)
                 del submitted_tasks[id_]
 
             scheduler.process_finished(newly_finished_tasks)
@@ -232,7 +232,7 @@ def _format_exception_message(id_, path, e):
     return f"\n\nTask '{id_}' in file '{path}' failed.\n\n{exc_info}"
 
 
-def _process_task_target(id_, dag, config):
+def _process_task_target(id_, dag):
     """Process the target of the task."""
     targets = ensure_list(dag.nodes[id_]["produces"])
     missing_targets = [
@@ -242,4 +242,4 @@ def _process_task_target(id_, dag, config):
         raise FileNotFoundError(
             f"Target(s) '{missing_targets}' was(were) not produced by task '{id_}'."
         )
-    save_hash_of_task_target(id_, dag, config)
+    save_hash_of_task_target(id_, dag)
