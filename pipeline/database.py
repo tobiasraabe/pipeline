@@ -17,6 +17,8 @@ class TaskOutput(db.Entity):
     target = orm.Required(str)
     data = orm.Required(orm.buffer)
 
+    orm.PrimaryKey(task, target)
+
 
 def create_database(config):
     db.bind(**config["db"])

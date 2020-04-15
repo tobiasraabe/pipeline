@@ -6,9 +6,11 @@ from pathlib import Path
 
 import click
 import networkx as nx
+from pony import orm
 from tqdm import tqdm
 
 from pipeline.dag import Scheduler
+from pipeline.database import TaskOutput
 from pipeline.exceptions import TaskError
 from pipeline.hashing import compare_hashes_of_task
 from pipeline.hashing import save_hash_of_task_target
@@ -70,7 +72,7 @@ def execute_dag_serially(dag, env, config):
 
             _ = _execute_task(id_, path, config["_is_debug"])
 
-            _process_task_target(id_, dag)
+            _process_task_targets(id_, dag)
 
             scheduler.process_finished(id_)
 
@@ -125,7 +127,7 @@ def execute_dag_parallelly(dag, env, config):
                 raise TaskError("\n\n".join(exceptions))
 
             for id_ in newly_finished_tasks:
-                _process_task_target(id_, dag)
+                _process_task_targets(id_, dag)
                 del submitted_tasks[id_]
 
             scheduler.process_finished(newly_finished_tasks)
@@ -232,8 +234,14 @@ def _format_exception_message(id_, path, e):
     return f"\n\nTask '{id_}' in file '{path}' failed.\n\n{exc_info}"
 
 
-def _process_task_target(id_, dag):
+def _process_task_targets(id_, dag):
     """Process the target of the task."""
+    _check_missing_targets(id_, dag)
+    save_hash_of_task_target(id_, dag)
+    _save_task_output_in_db(id_, dag)
+
+
+def _check_missing_targets(id_, dag):
     targets = ensure_list(dag.nodes[id_]["produces"])
     missing_targets = [
         Path(target).as_posix() for target in targets if not Path(target).exists()
@@ -242,4 +250,17 @@ def _process_task_target(id_, dag):
         raise FileNotFoundError(
             f"Target(s) '{missing_targets}' was(were) not produced by task '{id_}'."
         )
-    save_hash_of_task_target(id_, dag)
+
+
+@orm.db_session
+def _save_task_output_in_db(id_, dag):
+    targets = ensure_list(dag.nodes[id_]["produces"])
+    for target in targets:
+        path = Path(target)
+
+        try:
+            output_in_db = TaskOutput[id_, target]
+        except orm.ObjectNotFound:
+            TaskOutput(task=id_, target=target, data=path.read_bytes())
+        else:
+            output_in_db.data = path.read_bytes()

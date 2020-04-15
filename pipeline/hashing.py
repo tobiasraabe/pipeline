@@ -50,12 +50,12 @@ def compare_hashes_of_task(id_, env, dag, config):
 
             try:
                 hash_in_db = Hash[id_, node]
-                assert hash_ == hash_in_db.hash
+                assert hash_ == hash_in_db.hash_
             except orm.ObjectNotFound:
                 Hash(task=id_, dependency=node, hash_=hash_)
                 have_same_hashes = False
             except AssertionError:
-                hash_in_db.hash = hash_
+                hash_in_db.hash_ = hash_
                 have_same_hashes = False
 
         else:
