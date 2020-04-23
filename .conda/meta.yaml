@@ -31,6 +31,7 @@ requirements:
     - networkx
     - pandas >=0.0.24
     - pony
+    - pydot
     - pyyaml
     - pydot
     - statsmodels
