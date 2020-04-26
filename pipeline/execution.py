@@ -68,7 +68,7 @@ def execute_dag_serially(dag, env, config):
 
             path = _preprocess_task(id_, dag, env, config)
 
-            _ = _execute_task(id_, path, config["_is_debug"])
+            _ = _execute_task(id_, path, config)
 
             _process_task_target(id_, dag, config)
 
@@ -194,14 +194,14 @@ def _preprocess_task(id_, dag, env, config):
     return path
 
 
-def _execute_task(id_, path, is_debug):
+def _execute_task(id_, path, config):
     if path.suffix == ".py":
         try:
             subprocess.run(["python", str(path)], check=True)
 
         except subprocess.CalledProcessError as e:
             message = _format_exception_message(id_, path, e)
-            if is_debug:
+            if config["_is_debug"]:
                 click.echo(message)
                 click.echo("Rerun the task to enter the debugger.")
                 subprocess.run(
