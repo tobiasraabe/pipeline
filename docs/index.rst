@@ -8,6 +8,7 @@ Welcome to pipeline's documentation!
    getting-started
    user-guides/index
    templates/index
+   release_notes
 
 
 Indices and tables
