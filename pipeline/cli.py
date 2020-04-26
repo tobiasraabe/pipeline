@@ -12,7 +12,7 @@ from pipeline.templates import collect_templates
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 
 
-@click.group(context_settings=CONTEXT_SETTINGS)
+@click.group(context_settings=CONTEXT_SETTINGS, invoke_without_command=True)
 @click.version_option()
 def cli():
     """Command-line interface for pipeline."""
