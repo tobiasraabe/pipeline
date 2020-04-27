@@ -203,6 +203,22 @@ other tasks. Use ``priority`` in the task definition to set a task priority. For
 comprehensive introduction, see :doc:`task-priorities`.
 
 
+Run always
+----------
+
+Normally, you let **pipeline** handle whether a task should be executed depending on
+whether inputs or the output of the task has changed. In other cases, the task might
+handle this on its own. For example, you have a script which checks whether new data can
+be downloaded. This task needs to be always executed. For that, you can add ``run_always`` to the task dictionary like in the following example.
+
+.. code-block:: yaml
+
+    task:
+      template: task-template.py
+      produces: {{ build_directory }}/task-data.dat
+      run_always: true
+
+
 Forbidden Keys
 --------------
 
