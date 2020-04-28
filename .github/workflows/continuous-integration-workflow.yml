@@ -32,17 +32,33 @@ jobs:
         shell: bash -l {0}
         run: conda install -c conda-forge conda-build matplotlib numpy pydot scipy
 
-      - name: Run pytest.
+      - name: Validate codecov.yml
+        if: runner.os == 'Linux' && matrix.python-version == '3.7'
         shell: bash -l {0}
-        run: |
-          tox -e pytest -- --cov=pipeline
-          coverage xml --ignore-errors
+        run: cat codecov.yml | curl --data-binary @- https://codecov.io/validate
+
+      - name: Run unit tests.
+        shell: bash -l {0}
+        run: tox -e pytest -- -m unit --cov=./ --cov-report=xml
 
       - name: Upload coverage report.
         if: runner.os == 'Linux' && matrix.python-version == '3.7'
         uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          flags: unit
+          fail_ci_if_error: true
+
+      - name: Run end-to-end tests.
+        shell: bash -l {0}
+        run: tox -e pytest -- -m end_to_end --cov=./ --cov-report=xml
+
+      - name: Upload coverage report.
+        if: runner.os == 'Linux' && matrix.python-version == '3.7'
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: end_to_end
           fail_ci_if_error: true
 
       - name: Run sphinx.

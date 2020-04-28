@@ -5,6 +5,12 @@ coverage:
   status:
     default:
       threshold: 5%
+    unit:
+      flags: unit
+    integration:
+      flags: integration
+    end_to_end:
+      flags: end_to_end
 
 ignore:
   - ".tox/**/*"

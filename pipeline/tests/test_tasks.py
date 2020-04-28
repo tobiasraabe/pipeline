@@ -11,6 +11,7 @@ from pipeline.exceptions import DuplicatedTaskError
 from pipeline.tasks import process_tasks
 
 
+@pytest.mark.end_to_end
 def test_duplicated_task_ids_in_the_same_file(test_project_config):
     """Test whether a duplicated task in the same file raises an error."""
     config = test_project_config
@@ -38,6 +39,7 @@ def test_duplicated_task_ids_in_the_same_file(test_project_config):
     assert isinstance(result.exception, DuplicatedTaskError)
 
 
+@pytest.mark.end_to_end
 def test_duplicated_task_ids_in_different_files(test_project_config):
     """Test whether a duplicated task in separate files raises an error."""
     config = test_project_config
