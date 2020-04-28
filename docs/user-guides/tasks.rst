@@ -209,7 +209,8 @@ Run always
 Normally, you let **pipeline** handle whether a task should be executed depending on
 whether inputs or the output of the task has changed. In other cases, the task might
 handle this on its own. For example, you have a script which checks whether new data can
-be downloaded. This task needs to be always executed. For that, you can add ``run_always`` to the task dictionary like in the following example.
+be downloaded. This task needs to be always executed. For that, you can add
+``run_always`` to the task dictionary like in the following example.
 
 .. code-block:: yaml
 
