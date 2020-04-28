@@ -34,7 +34,16 @@ def _collect_user_defined_tasks(config):
 
     tasks = {}
     for path in task_files:
-        template = jinja2.Template(path.read_text())
+        try:
+            template = jinja2.Template(path.read_text())
+        except jinja2.exceptions.TemplateSyntaxError as e:
+            message = (
+                f"\n\nAn error happened while rendering the task template {path}. "
+                "This happens because a jinja2 variable within the template is not "
+                "defined, misspelled, etc.."
+            )
+            raise Exception(message) from e
+
         rendered_template = template.render(**config)
 
         tasks_in_file = read_yaml(rendered_template)

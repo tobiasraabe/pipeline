@@ -1,3 +1,4 @@
+import os
 import subprocess
 import sys
 import time
@@ -196,16 +197,21 @@ def _preprocess_task(id_, dag, env, config):
 
 def _execute_task(id_, path, config):
     if path.suffix == ".py":
+        environment = _patch_subprocess_environment(config)
+
         try:
-            subprocess.run(["python", str(path)], check=True)
+            subprocess.run(["python", str(path)], check=True, env=environment)
 
         except subprocess.CalledProcessError as e:
             message = _format_exception_message(id_, path, e)
             if config["_is_debug"]:
                 click.echo(message)
                 click.echo("Rerun the task to enter the debugger.")
+
                 subprocess.run(
-                    ["python", "-m", "pdb", "-c", "continue", str(path)], check=True,
+                    ["python", "-m", "pdb", "-c", "continue", str(path)],
+                    check=True,
+                    env=environment,
                 )
                 sys.exit("### Abort build.")
             else:
@@ -243,3 +249,19 @@ def _process_task_target(id_, dag, config):
             f"Target(s) '{missing_targets}' was(were) not produced by task '{id_}'."
         )
     save_hash_of_task_target(id_, dag, config)
+
+
+def _patch_subprocess_environment(config):
+    """Patch the environment of the subprocess.
+
+    The problem is that task files are rendered and, then, stored in the hidden build
+    directory. This would prohibit imports if we did not add the project root to the
+    `PYTHONPATH`.
+
+    """
+    env = os.environ.copy()
+    env["PYTHONPATH"] = (
+        str(Path(config["project_directory"])) + ";" + env.get("PYTHONPATH", "")
+    )
+
+    return env
