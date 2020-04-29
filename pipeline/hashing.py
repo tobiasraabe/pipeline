@@ -59,12 +59,12 @@ def compare_hashes_of_task(id_, env, dag, config):
             for path in paths:
                 hash_ = _compute_hash_of_file(path, path.stat().st_mtime)
 
-                if hash_ == hashes[id_].get(node, None):
+                if hash_ == hashes[id_].get(path.as_posix(), None):
                     pass
 
                 else:
                     have_same_hashes = False
-                    hashes[id_][node] = hash_
+                    hashes[id_][path.as_posix()] = hash_
 
         else:
             have_same_hashes = False
@@ -90,7 +90,7 @@ def save_hashes_of_task_dependencies(id_, env, dag, config):
                 hash_ = _compute_hash_of_file(p, p.stat().st_mtime)
 
                 hashes[id_] = hashes.get(id_, {})
-                hashes[id_][str(p)] = hash_
+                hashes[id_][p.as_posix()] = hash_
 
     _dump_hashes(hashes, config)
 
@@ -104,7 +104,7 @@ def save_hash_of_task_target(id_, dag, config):
 
         for p in paths:
             hash_ = _compute_hash_of_file(p, p.stat().st_mtime)
-            hashes[id_][str(p)] = hash_
+            hashes[id_][p.as_posix()] = hash_
 
     _dump_hashes(hashes, config)
 
