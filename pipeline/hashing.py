@@ -43,12 +43,9 @@ def compare_hashes_of_task(id_, env, dag, config):
     for node in dependencies_and_targets:
         path = Path(node)
 
-        if node in env.list_templates() or path.exists():
-            if node in env.list_templates():
-                rendered_task = render_task_template(id_, dag.nodes[id_], env, config)
-                hash_ = _compute_hash_of_string(rendered_task)
-            else:
-                hash_ = _compute_hash_of_file(path, path.stat().st_mtime)
+        if node in env.list_templates():
+            rendered_task = render_task_template(id_, dag.nodes[id_], env, config)
+            hash_ = _compute_hash_of_string(rendered_task)
 
             if hash_ == hashes[id_].get(node, None):
                 pass
@@ -56,6 +53,21 @@ def compare_hashes_of_task(id_, env, dag, config):
             else:
                 have_same_hashes = False
                 hashes[id_][node] = hash_
+        elif path.exists():
+            if path.is_dir():
+                paths = list(path.rglob("*"))
+            else:
+                paths = [path]
+
+            for path in paths:
+                hash_ = _compute_hash_of_file(path, path.stat().st_mtime)
+
+                if hash_ == hashes[id_].get(node, None):
+                    pass
+
+                else:
+                    have_same_hashes = False
+                    hashes[id_][node] = hash_
 
         else:
             have_same_hashes = False
@@ -72,12 +84,20 @@ def save_hashes_of_task_dependencies(id_, env, dag, config):
         if dependency in env.list_templates():
             rendered_task = render_task_template(id_, dag.nodes[id_], env, config)
             hash_ = _compute_hash_of_string(rendered_task)
+            hashes[id_] = hashes.get(id_, {})
+            hashes[id_][dependency] = hash_
         else:
             path = Path(dependency)
-            hash_ = _compute_hash_of_file(path, path.stat().st_mtime)
+            if path.is_dir():
+                paths = list(path.rglob("*"))
+            else:
+                paths = [path]
 
-        hashes[id_] = hashes.get(id_, {})
-        hashes[id_][dependency] = hash_
+            for p in paths:
+                hash_ = _compute_hash_of_file(p, p.stat().st_mtime)
+
+                hashes[id_] = hashes.get(id_, {})
+                hashes[id_][str(p)] = hash_
 
     _dump_hashes(hashes, config)
 
@@ -86,10 +106,16 @@ def save_hash_of_task_target(id_, dag, config):
     """Loop over the targets of a task and save the hashes of the files."""
     hashes = _load_hashes(config)
 
-    for string_path in ensure_list(dag.nodes[id_]["produces"]):
-        path = Path(string_path)
-        hash_ = _compute_hash_of_file(path, path.stat().st_mtime)
-        hashes[id_][string_path] = hash_
+    for path in ensure_list(dag.nodes[id_]["produces"]):
+        path = Path(path)
+        if path.is_dir():
+            paths = list(path.rglob("*"))
+        else:
+            paths = [path]
+
+        for p in paths:
+            hash_ = _compute_hash_of_file(p, p.stat().st_mtime)
+            hashes[id_][str(p)] = hash_
 
     _dump_hashes(hashes, config)
 
