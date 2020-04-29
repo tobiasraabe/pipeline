@@ -138,10 +138,14 @@ def execute_dag_parallelly(dag, env, config):
 def _collect_unfinished_tasks(dag, env, config):
     """Collect unfinished tasks.
 
-    Iterate over topological sorted nodes in the DAG. If the node is a task, compare the
-    hashes of all dependencies and targets. If the hashes do not match, add the task to
-    the set of unfinished tasks. After that, go through the whole list of descendants of
-    the task and mark all tasks among them as unfinished, too.
+    Iterate over topological sorted nodes in the DAG. If the node is a task, do the
+    following.
+
+    1. If the task is marked to be always executed, add it to the set.
+    2. Otherwise, compare the hashes of all dependencies and targets. If the hashes do
+       not match, add the task to the set of unfinished tasks. After that, go through
+       the whole list of descendants of the task and mark all tasks among them as
+       unfinished, too.
 
     Parameters
     ----------
@@ -155,13 +159,16 @@ def _collect_unfinished_tasks(dag, env, config):
     """
     unfinished_tasks = set()
     for id_ in nx.topological_sort(dag):
-        if dag.nodes[id_]["_is_task"] and id_ not in unfinished_tasks:
-            have_same_hashes = compare_hashes_of_task(id_, env, dag, config)
-            if not have_same_hashes:
+        if dag.nodes[id_]["_is_task"]:
+            if dag.nodes[id_].get("run_always", False):
                 unfinished_tasks.add(id_)
-                for descendant in nx.descendants(dag, id_):
-                    if dag.nodes[descendant]["_is_task"]:
-                        unfinished_tasks.add(descendant)
+            else:
+                have_same_hashes = compare_hashes_of_task(id_, env, dag, config)
+                if not have_same_hashes:
+                    unfinished_tasks.add(id_)
+                    for descendant in nx.descendants(dag, id_):
+                        if dag.nodes[descendant]["_is_task"]:
+                            unfinished_tasks.add(descendant)
 
     return unfinished_tasks
 
