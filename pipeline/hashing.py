@@ -54,10 +54,7 @@ def compare_hashes_of_task(id_, env, dag, config):
                 have_same_hashes = False
                 hashes[id_][node] = hash_
         elif path.exists():
-            if path.is_dir():
-                paths = list(path.rglob("*"))
-            else:
-                paths = [path]
+            paths = _path_to_file_or_directory_to_path_iterator(path)
 
             for path in paths:
                 hash_ = _compute_hash_of_file(path, path.stat().st_mtime)
@@ -87,11 +84,7 @@ def save_hashes_of_task_dependencies(id_, env, dag, config):
             hashes[id_] = hashes.get(id_, {})
             hashes[id_][dependency] = hash_
         else:
-            path = Path(dependency)
-            if path.is_dir():
-                paths = list(path.rglob("*"))
-            else:
-                paths = [path]
+            paths = _path_to_file_or_directory_to_path_iterator(dependency)
 
             for p in paths:
                 hash_ = _compute_hash_of_file(p, p.stat().st_mtime)
@@ -107,11 +100,7 @@ def save_hash_of_task_target(id_, dag, config):
     hashes = _load_hashes(config)
 
     for path in ensure_list(dag.nodes[id_]["produces"]):
-        path = Path(path)
-        if path.is_dir():
-            paths = list(path.rglob("*"))
-        else:
-            paths = [path]
+        paths = _path_to_file_or_directory_to_path_iterator(path)
 
         for p in paths:
             hash_ = _compute_hash_of_file(p, p.stat().st_mtime)
@@ -180,3 +169,14 @@ def _compute_hash_of_string(string, algorithm="sha256"):
     h.update(string.encode("utf-8"))
 
     return h.hexdigest()
+
+
+def _path_to_file_or_directory_to_path_iterator(path):
+    """Convert a path to a file or directory to an iterator over paths."""
+    path = Path(path)
+    if path.is_dir():
+        paths = list(path.rglob("*"))
+    else:
+        paths = [path]
+
+    return paths
