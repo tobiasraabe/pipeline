@@ -10,16 +10,17 @@ releases are available on `Anaconda.org
 0.0.6 - 2020-
 -------------
 
--
+- Add project root directory to the ``PYTHONPATH`` so that every task can import with
+  ``from src.... import ...`` (:gh:`13`).
 
 
 0.0.5 - 2020-04-26
 ------------------
 
 - Added ``pydot`` as a package dependency  and added all information in ``config`` to
-  render a task template (:gh:`11`)
-- Remove references to respy (:gh:`8`)
-- Fix codecov (:gh:`7`)
+  render a task template (:gh:`11`).
+- Remove references to respy (:gh:`8`).
+- Fix codecov (:gh:`7`).
 
 
 0.0.4 - 2020-04-06
