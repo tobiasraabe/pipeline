@@ -17,6 +17,7 @@ def test_cli_collect(test_project_config):
         assert result.exit_code == 0
 
 
+@pytest.mark.end_to_end
 def test_run_always(test_project_config):
     """Test whether tasks are rerun if they should always run."""
     config = test_project_config
