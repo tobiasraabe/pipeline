@@ -12,6 +12,7 @@ releases are available on `Anaconda.org
 
 - Add project root directory to the ``PYTHONPATH`` so that every task can import with
   ``from src.... import ...`` (:gh:`13`).
+- Allow to have directories as task dependencies and targets (:gh:`15`).
 
 
 0.0.5 - 2020-04-26
