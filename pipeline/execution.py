@@ -118,7 +118,7 @@ def execute_dag_parallelly(dag, env, config):
 
             # Check for exceptions.
             exceptions = [
-                future.exception().message
+                str(future.exception())
                 for future in submitted_tasks.values()
                 if future.exception()
             ]
