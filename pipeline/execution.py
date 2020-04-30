@@ -105,7 +105,7 @@ def execute_dag_parallelly(dag, env, config):
 
                 path = _preprocess_task(id_, dag, env, config)
 
-                future = executor.submit(_execute_task, id_, path, config["_is_debug"])
+                future = executor.submit(_execute_task, id_, path, config)
                 future.add_done_callback(lambda x: t.update())
                 submitted_tasks[id_] = future
 
