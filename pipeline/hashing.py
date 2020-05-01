@@ -164,7 +164,14 @@ def _compute_hash_of_file(path, _last_modified=None, algorithm="sha256"):
 
 
 def _compute_hash_of_string(string, algorithm="sha256"):
-    """Compute hash of a string."""
+    """Compute hash of a string.
+
+    Example
+    -------
+    >>> _compute_hash_of_string("abcde")
+    '36bbe50ed96841d10443bcb670d6554f0a34b761be67ec9c4a8ad2c0c44ca42c'
+
+    """
     h = hashlib.new(algorithm)
     h.update(string.encode("utf-8"))
 
