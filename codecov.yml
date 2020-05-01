@@ -5,11 +5,14 @@ coverage:
   status:
     project:
       unit:
-        flags: unit
+        flags:
+          - unit
       integration:
-        flags: integration
+        flags:
+          - integration
       end_to_end:
-        flags: end_to_end
+        flags:
+          - end_to_end
 
 ignore:
   - ".tox/**/*"
