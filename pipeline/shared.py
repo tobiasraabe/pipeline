@@ -32,7 +32,7 @@ def render_task_template(id_, task_info, env, config):
         rendered_template = template.render(**config, **task_info)
     except jinja2.exceptions.UndefinedError as e:
         raise jinja2.exceptions.UndefinedError(
-            f"Task '{id_}' has an undefined variable."
-        ).with_traceback(e.__traceback__)
+            str(e) + "\n\n" + f"Task '{id_}' has an undefined variable."
+        )
     else:
         return rendered_template
