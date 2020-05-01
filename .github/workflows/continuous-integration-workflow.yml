@@ -7,6 +7,9 @@ on:
     branches:
     - '*'
 
+env:
+  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
 jobs:
   run-tests:
     name: Run tests for ${{ matrix.os }} on ${{ matrix.python-version }}
@@ -45,7 +48,7 @@ jobs:
 
       - name: Upload coverage report for unit tests and doctests.
         shell: bash -l {0}
-        run: bash <(curl -s https://codecov.io/bash) -F unit -c -t ${{ secrets.CODECOV_TOKEN }}
+        run: bash <(curl -s https://codecov.io/bash) -F unit -c
 
       - name: Run end-to-end tests.
         shell: bash -l {0}
@@ -53,7 +56,7 @@ jobs:
 
       - name: Upload coverage reports of end-to-end tests.
         shell: bash -l {0}
-        run: bash <(curl -s https://codecov.io/bash) -F end_to_end -c -t ${{ secrets.CODECOV_TOKEN }}
+        run: bash <(curl -s https://codecov.io/bash) -F end_to_end -c
 
       # Other tests.
 
