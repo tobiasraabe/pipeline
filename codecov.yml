@@ -5,14 +5,19 @@ coverage:
   status:
     project:
       default:
-        target: auto
+        threshold: 1%
+      patch:
+        threshold: 1%
       unit:
+        threshold: 1%
         flags:
           - unit
       # integration:
+      #   threshold: 1%
       #   flags:
       #     - integration
       end_to_end:
+        threshold: 1%
         flags:
           - end_to_end
 
