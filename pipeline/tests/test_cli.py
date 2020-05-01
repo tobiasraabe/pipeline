@@ -67,3 +67,19 @@ def test_run_always(test_project_config):
     assert result.exit_code == 0
 
     assert project_path.joinpath("bld", "out.txt").read_text() == "1"
+
+
+@pytest.mark.end_to_end
+def test_missing_pipeline_configuration(test_project_config):
+    config = test_project_config
+
+    # Remove configuration.
+    Path(config["project_directory"]).joinpath(".pipeline.yaml").unlink()
+
+    os.chdir(config["project_directory"])
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["build"])
+
+    assert result.exit_code == 1
+    assert str(result.exception) == "Cannot find '.pipeline.yaml' in current directory."
