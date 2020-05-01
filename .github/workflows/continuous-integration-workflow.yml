@@ -49,17 +49,17 @@ jobs:
           flags: unit
           fail_ci_if_error: true
 
-      - name: Run integration tests.
-        shell: bash -l {0}
-        run: tox -e pytest -- -m integration --cov=./ --cov-report=xml
+      # - name: Run integration tests.
+      #   shell: bash -l {0}
+      #   run: tox -e pytest -- -m integration --cov=./ --cov-report=xml
 
-      - name: Upload coverage report.
-        if: runner.os == 'Linux' && matrix.python-version == '3.7'
-        uses: codecov/codecov-action@v1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          flags: integration
-          fail_ci_if_error: true
+      # - name: Upload coverage report.
+      #   if: runner.os == 'Linux' && matrix.python-version == '3.7'
+      #   uses: codecov/codecov-action@v1
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+      #     flags: integration
+      #     fail_ci_if_error: true
 
       - name: Run end-to-end tests.
         shell: bash -l {0}
