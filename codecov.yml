@@ -3,25 +3,13 @@ coverage:
   precision: 2
   round: down
   status:
-    default:
-      threshold: 5%
-    unit:
-      flags: unit
-    integration:
-      flags: integration
-    end_to_end:
-      flags: end_to_end
-
-flags:
-  unit:
-    paths:
-      - .
-  integration:
-    paths:
-      - .
-  end_to_end:
-    paths:
-      - .
+    project:
+      unit:
+        flags: unit
+      integration:
+        flags: integration
+      end_to_end:
+        flags: end_to_end
 
 ignore:
   - ".tox/**/*"
