@@ -6,8 +6,10 @@ import yaml
 from pipeline.config import load_config
 from pipeline.cli import cli
 from pathlib import Path
+import pytest
 
 
+@pytest.mark.end_to_end
 def test_collection_of_files_and_directories(test_project_config):
     """Test template collection via function and CLI."""
     config = test_project_config
@@ -43,6 +45,7 @@ def test_collection_of_files_and_directories(test_project_config):
     assert result.exit_code == 0
 
 
+@pytest.mark.end_to_end
 def test_globals_in_templates(test_project_config):
     """Test using globals in templates."""
     config = test_project_config
