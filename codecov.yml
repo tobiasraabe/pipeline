@@ -3,15 +3,16 @@ coverage:
   round: down
   range: 80...100
   status:
-    unit:
-      flags:
-        - unit
-    # integration:
-    #   flags:
-    #     - integration
-    end_to_end:
-      flags:
-        - end_to_end
+    project:
+      unit:
+        flags:
+          - unit
+      # integration:
+      #   flags:
+      #     - integration
+      end_to_end:
+        flags:
+          - end_to_end
 
 ignore:
   - ".tox/**/*"
