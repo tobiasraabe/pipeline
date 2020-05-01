@@ -5,9 +5,7 @@ coverage:
   status:
     project:
       default:
-        flags:
-          - unit
-          - end_to_end
+        target: auto
       unit:
         flags:
           - unit
