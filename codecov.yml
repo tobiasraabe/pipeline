@@ -12,6 +12,17 @@ coverage:
     end_to_end:
       flags: end_to_end
 
+flags:
+  unit:
+    paths:
+      - .
+  integration:
+    paths:
+      - .
+  end_to_end:
+    paths:
+      - .
+
 ignore:
   - ".tox/**/*"
   - "setup.py"
