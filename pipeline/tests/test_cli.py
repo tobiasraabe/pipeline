@@ -2,11 +2,13 @@ import os
 import textwrap
 from pathlib import Path
 
+import pytest
 from click.testing import CliRunner
 
 from pipeline.cli import cli
 
 
+@pytest.mark.end_to_end
 def test_cli_collect(test_project_config):
     for flag in ["--config", "--tasks", "--templates"]:
         os.chdir(test_project_config["project_directory"])
@@ -15,6 +17,7 @@ def test_cli_collect(test_project_config):
         assert result.exit_code == 0
 
 
+@pytest.mark.end_to_end
 def test_run_always(test_project_config):
     """Test whether tasks are rerun if they should always run."""
     config = test_project_config

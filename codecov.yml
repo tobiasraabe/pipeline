@@ -1,10 +1,20 @@
 coverage:
-  range: 50...100
   precision: 2
   round: down
+  range: 80...100
   status:
-    default:
-      threshold: 5%
+    project:
+      default:
+        target: auto
+      unit:
+        flags:
+          - unit
+      # integration:
+      #   flags:
+      #     - integration
+      end_to_end:
+        flags:
+          - end_to_end
 
 ignore:
   - ".tox/**/*"
