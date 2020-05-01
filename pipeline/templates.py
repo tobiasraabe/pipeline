@@ -78,8 +78,27 @@ class _FileAndDirectoryLoader(jinja2.BaseLoader):
 
 
 def ensure_r_vector(x):
+    """Ensures that the input is rendered as a vector in R.
+
+    It is way more complicated to define an array in R than in Python because an array
+    in R cannot end with an comma.
+
+    Examples
+    --------
+    >>> ensure_r_vector("string")
+    "c('string')"
+    >>> ensure_r_vector(1)
+    'c(1)'
+    >>> ensure_r_vector(list("abcd"))
+    "c('a', 'b', 'c', 'd')"
+    >>> ensure_r_vector((1, 2))
+    'c(1, 2)'
+
+    """
     if isinstance(x, str):
         out = f"c('{x}')"
+    elif isinstance(x, numbers.Number):
+        out = f"c({x})"
     elif isinstance(x, (tuple, list)):
         mapped = map(lambda l: str(l) if isinstance(l, numbers.Number) else f"'{l}'", x)
         concatenated = ", ".join(mapped)
