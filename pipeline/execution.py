@@ -183,8 +183,8 @@ def _compute_padding_to_prevent_task_description_from_moving(unfinished_tasks):
 def _preprocess_task(id_, dag, env, config):
     file = render_task_template(id_, dag.nodes[id_], env, config)
 
-    if "produces" in dag.nodes[id_]:
-        Path(dag.nodes[id_]["produces"]).parent.mkdir(parents=True, exist_ok=True)
+    for target in ensure_list(dag.nodes[id_].get("produces", [])):
+        Path(target).parent.mkdir(parents=True, exist_ok=True)
 
     if dag.nodes[id_]["template"].endswith(".py"):
         path = Path(config["hidden_task_directory"], id_ + ".py")
@@ -253,7 +253,7 @@ def _process_task_target(id_, dag, config):
     ]
     if missing_targets:
         raise FileNotFoundError(
-            f"Target(s) '{missing_targets}' was(were) not produced by task '{id_}'."
+            f"Target(s) {missing_targets} was(were) not produced by task '{id_}'."
         )
     save_hash_of_task_target(id_, dag, config)
 
