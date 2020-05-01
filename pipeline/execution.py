@@ -174,6 +174,19 @@ def _collect_unfinished_tasks(dag, env, config):
 
 
 def _compute_padding_to_prevent_task_description_from_moving(unfinished_tasks):
+    """Compute the padding to have task descriptions with the same length.
+
+    Some task names are longer than others. The tqdm progress bar would be constantly
+    adjusting if more space is available. Instead, we compute the length of the longest
+    task name and add whitespace to the right.
+
+    Example
+    -------
+    >>> unfinished_tasks = ["short_name", "long_task_name"]
+    >>> _compute_padding_to_prevent_task_description_from_moving(unfinished_tasks)
+    14
+
+    """
     len_task_names = list(map(len, unfinished_tasks))
     padding = max(len_task_names) if len_task_names else 0
 
