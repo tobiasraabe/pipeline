@@ -4,5 +4,5 @@ dependencies:
   - python=3.7
   - ipython
   - numpydoc
-  - sphinx
   - pydata-sphinx-theme
+  - sphinx

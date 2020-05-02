@@ -1,6 +1,5 @@
-===============
-Getting Started
-===============
+10 Minutes Guide to pipeline
+============================
 
 To get started with **pipeline**, we will create a project similar to the
 ``simple-project`` over at `OpenSourceEconomics/pipeline-demo-project
@@ -18,7 +17,7 @@ indicates the top of the project. To inspect the default configuration, type
     $ pipeline collect --config
 
 If you want to deviate from the current configuration, add your keys and values to
-``.pipeline.yaml``. See more on this in :doc:`user-guides/configuration`.
+``.pipeline.yaml``. See more on this in :doc:`../../how_to_guides/configuration`.
 
 
 src, tasks, and templates
