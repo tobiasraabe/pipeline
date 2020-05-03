@@ -35,8 +35,8 @@ pipeline looks like this:
 First of all, a collection of tasks is a dictionary where the keys are the names and the
 values are the specification of the tasks.
 
-1. In this case, the task's name is ``hello_earth``. The ids of the tasks have to be
-   unique within the project.
+1. In this case, the task's name or id is ``hello_earth``. The ids of the tasks have to
+   be unique within the project.
 
 Then, we take a look at the value of the dictionary or specification which is a
 dictionary itself.

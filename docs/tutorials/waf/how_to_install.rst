@@ -14,7 +14,8 @@ To install pipeline, type
     $ conda install -c opensourceeconomics pipeline
 
 To indicate the root of the project, place a ``.pipeline.yaml`` in the directory. You
-can leave the file empty and use the default configuration. Here is a sample.
+can leave the file empty and use the default configuration. Here is a sample of the
+default configuration.
 
 .. code-block:: yaml
 
@@ -24,4 +25,4 @@ can leave the file empty and use the default configuration. Here is a sample.
     build_directory: bld
 
 pipeline needs no ``configure`` because the configuration is created dynamically. It
-also has a ``build`` and ``clean`` command which work similar.
+also has a ``build`` and ``clean`` command which work similarly.

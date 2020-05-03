@@ -43,4 +43,4 @@ required task. The specification changes to
       depends_on: hello_earth
       ...
 
-The id ``hello_earth`` is replaced with the path to the product of the task.
+The id ``hello_earth`` is replaced with the path to the product of the declared task.

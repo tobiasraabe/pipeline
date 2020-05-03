@@ -35,7 +35,7 @@ The second task file for pipeline becomes
         dependency = Path("{{ build_directory }}", "hello_earth.txt")
         target = Path("{{ build_directory }}", "hello_moon.txt")
 
-        target.write_text("Hello, Earth!")
+        target.write_text(dependency.read_text() + "\n\n" + "Hello, Moon!")
 
 
     if __name__ == "__main__":
