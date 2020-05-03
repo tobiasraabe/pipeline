@@ -1,8 +1,8 @@
 10 Minutes Guide to pipeline
 ============================
 
-To get started with **pipeline**, we will create a project similar to the
-``simple-project`` over at `OpenSourceEconomics/pipeline-demo-project
+To get started with pipeline, we will create a project similar to the ``simple-project``
+over at `OpenSourceEconomics/pipeline-demo-project
 <https://github.com/OpenSourceEconomics/pipeline-demo-project>`_.
 
 
@@ -23,8 +23,8 @@ If you want to deviate from the current configuration, add your keys and values 
 src, tasks, and templates
 -------------------------
 
-By default, **pipeline** assumes that your tasks rest somewhere in ``src`` and searches
-the directory recursively. Tasks are defined in ``.yaml`` files. Let us take a look at
+By default, pipeline assumes that your tasks rest somewhere in ``src`` and searches the
+directory recursively. Tasks are defined in ``.yaml`` files. Let us take a look at
 ``src/data_management.yaml`` and only at the first task.
 
 .. code-block:: yaml
@@ -43,7 +43,7 @@ further analysis. If you take a look at the file, you will see a pretty normal P
 scipt except for the ``{{ produces }}`` field when the data is saved. The doubled curly
 braces are used in `Jinja2 <https://jinja.palletsprojects.com/en/2.11.x/>`_ templates to
 insert variables. Here, you have two options: First, you can leave it as it is and
-**pipeline** will fill in a path for ``{{ produces }}`` or, secondly, you can go back to
+pipeline will fill in a path for ``{{ produces }}`` or, secondly, you can go back to
 your ``data_management.yaml`` and insert ``produces: {{ build_directory
 }}/data/random-data.csv`` below template, to make the output path explicit.
 
@@ -61,9 +61,9 @@ Next, we want to run OLS regression on our random data. For that, we define an
 
 For the task, we select the pre-defined ``ols.r`` template which runs the OLS regression
 in R. The template requires a linear model and data. The formula gives you the equation
-of the regression you want to run. A part of **pipeline**'s user-friendliness is due to
-the ``depends_on`` key. Here, you would have normally given the path to the random data,
-but with **pipeline** you only need to reference the task id which generated the data.
+of the regression you want to run. A part of pipeline's user-friendliness is due to the
+``depends_on`` key. Here, you would have normally given the path to the random data, but
+with pipeline you only need to reference the task id which generated the data.
 
 Why have we run the regressions in R? Because R has ``stargazer``, an amazing package to
 produce publication-ready regression tables. Let us look at ``tables.yaml``.
@@ -104,8 +104,8 @@ bld
 You will find your regression table in ``bld/tables/regression-table-r.html``.
 
 There is also a hidden folder named ``.pipeline``. It contains intermediate or internal
-files produced by **pipeline**. You can also find a visualization of the projects
-directed acyclic graph (DAG).
+files produced by pipeline. You can also find a visualization of the projects directed
+acyclic graph (DAG).
 
 If a task throws and error, you might, apart from debugging, want to take a look at the
 ``bld/.tasks`` folder which contains the compiled task template. You might find an error
@@ -115,6 +115,6 @@ while expecting this file.
 Demo projects
 -------------
 
-**pipeline** is tested on some demo projects which are also a good starting point for
+pipeline is tested on some demo projects which are also a good starting point for
 beginners. You can find them under
 https://github.com/OpenSourceEconomics/pipeline-demo-project.

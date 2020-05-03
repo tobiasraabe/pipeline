@@ -1,7 +1,7 @@
 Tutorials
 =========
 
-Tutorials help you to get started with **pipeline**.
+Tutorials help you to get started with pipeline.
 
 .. raw:: html
 
@@ -32,7 +32,9 @@ Tutorials help you to get started with **pipeline**.
                              alt="waf-tutorial-icon" height="52"
                         >
                         <div class="card-body flex-fill">
-                            <h5 class="card-title">Migrating from Waf</h5>
+                            <h5 class="card-title">
+                                Migrating from Waf / econ-project-templates
+                            </h5>
                             <p class="card-text">
                                 This guide is dedicated to users migrating from Waf to
                                 pipeline. Equivalent objects are explained

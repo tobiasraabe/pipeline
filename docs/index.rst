@@ -118,4 +118,5 @@ The documentation is structured into four parts.
    :maxdepth: 1
 
    templates/index
+   glossary
    release_notes

@@ -2,8 +2,7 @@
 Debugging
 =========
 
-Debugging a workflow should be easy which is why **pipeline** offers multiple ways to do
-it.
+Debugging a workflow should be easy which is why pipeline offers multiple ways to do it.
 
 
 Basics

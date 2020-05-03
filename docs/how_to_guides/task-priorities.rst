@@ -5,7 +5,7 @@ Task priorities
 A similar workflow is available as a `demo project <https://github.com/
 OpenSourceEconomics/pipeline-demo-project/tree/master/priority-scheduling>`_.
 
-With **pipeline** you are able to assign priorities to tasks such that the execution of
+With pipeline you are able to assign priorities to tasks such that the execution of
 tasks with higher priorities is preferred over tasks with lower priority.
 
 This feature was designed with task queues for complex bootstraps or Monte Carlo
@@ -61,7 +61,7 @@ preferred. The default priority of a task is zero.
 Running a pipeline with such priorities would ensure that a continued execution from
 sampling to extraction is preferred over sampling additional data sets.
 
-Although, it is simple to assign priorities in this example, **pipeline** offers an
+Although, it is simple to assign priorities in this example, pipeline offers an
 additional and more convenient solution. Ultimately, you are interested in the
 distribution of statistics. So, we put a priority of 1 on the last task which plots the
 distribution.
