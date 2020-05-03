@@ -2,8 +2,8 @@
 Estimations
 ===========
 
-**pipeline** offers :doc:`../templates/index` for various estimation methods. To
-generate multiple models, the ``formula`` is a powerful tool.
+pipeline offers :doc:`../templates/index` for various estimation methods. To generate
+multiple models, the ``formula`` is a powerful tool.
 
 
 Formulas
