@@ -10,7 +10,7 @@ Tutorials help you to get started with pipeline.
             <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12 d-flex">
                 <a href="beginners_guide/index.html" id="index-link">
                     <div class="card text-center intro-card shadow">
-                        <img src="../../../_static/images/light-bulb.svg"
+                        <img src="../_static/images/light-bulb.svg"
                              class="card-img-top" alt="beginners-guide-tutorial-icon"
                              height="52"
                         >
@@ -28,7 +28,7 @@ Tutorials help you to get started with pipeline.
             <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12 d-flex">
                 <a href="waf/index.html" id="index-link">
                     <div class="card text-center intro-card shadow">
-                        <img src="../../../_static/images/waf.svg" class="card-img-top"
+                        <img src="../_static/images/waf.svg" class="card-img-top"
                              alt="waf-tutorial-icon" height="52"
                         >
                         <div class="card-body flex-fill">
