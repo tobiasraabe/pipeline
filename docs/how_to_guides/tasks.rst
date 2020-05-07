@@ -10,10 +10,10 @@ Basics
 This section goes into the details of tasks. Tasks have to be defined by the user and
 are the essential building blocks of a workflow which can be executed with pipeline.
 
-Tasks are defined in a ``.yaml`` file which is a dictionary. The keys of the dictionary
-are the ids of the tasks and the values are dictionaries with more information on the
-specific task. Each task dictionary consists of at least three explicit attributes, an
-id, a template, and a target.
+Tasks are defined in a ``.yaml`` file (not in ``.yml`` which is a dictionary. The keys
+of the dictionary are the ids of the tasks and the values are dictionaries with more
+information on the specific task. Each task dictionary consists of at least three
+explicit attributes, an id, a template, and a target.
 
 - The unique id allows to identify the task among others and automatically generate
   placeholder names for the targets of the task.

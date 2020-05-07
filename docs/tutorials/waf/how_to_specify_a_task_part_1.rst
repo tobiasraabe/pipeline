@@ -21,8 +21,8 @@ Tasks in Waf are defined in ``wscript`` files. A file might look like this:
             name="hello_earth",
         )
 
-In contrast, tasks for pipeline are defined in ``.yaml`` files. The same task for
-pipeline looks like this:
+In contrast, tasks for pipeline are defined in ``.yaml`` files, not ``.yml``. The same
+task for pipeline looks like this:
 
 .. code-block:: yaml
 

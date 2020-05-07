@@ -48,16 +48,19 @@ def _collect_user_defined_tasks(config):
 
         tasks_in_file = read_yaml(rendered_template)
 
-        if tasks_in_file:
+        if isinstance(tasks_in_file, dict) and tasks_in_file:
             # Add config location to task_info.
+            found_tasks_in_file = {}
             for id_ in tasks_in_file:
-                tasks_in_file[id_]["config"] = path.as_posix()
+                if "template" in tasks_in_file[id_]:
+                    found_tasks_in_file[id_] = tasks_in_file[id_]
+                    found_tasks_in_file[id_]["config"] = path.as_posix()
 
-            duplicated_ids = set(tasks_in_file) & set(tasks)
+            duplicated_ids = set(found_tasks_in_file) & set(tasks)
             if duplicated_ids:
                 raise DuplicatedTaskError(duplicated_ids)
 
-            tasks.update(tasks_in_file)
+            tasks.update(found_tasks_in_file)
 
     return tasks
 
