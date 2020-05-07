@@ -13,5 +13,8 @@ class Hash(db.Entity):
 
 
 def create_database(config):
-    db.bind(**config["db"])
-    db.generate_mapping(create_tables=True)
+    try:
+        db.bind(**config["db"])
+        db.generate_mapping(create_tables=True)
+    except orm.BindingError:
+        pass

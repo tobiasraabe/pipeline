@@ -65,7 +65,7 @@ def compare_hashes_of_task(id_, env, dag, config):
                     hash_in_db = Hash[path.as_posix(), node]
                     assert hash_ == hash_in_db.hash_
                 except orm.ObjectNotFound:
-                    Hash(task=id_, dependency=node, hash_=hash_)
+                    Hash(task=id_, dependency=path.as_posix(), hash_=hash_)
                     have_same_hashes = False
                 except AssertionError:
                     hash_in_db.hash_ = hash_
@@ -95,13 +95,13 @@ def save_hashes_of_task_dependencies(id_, env, dag, config):
         else:
             paths = _path_to_file_or_directory_to_path_iterator(dependency)
 
-            for p in paths:
-                hash_ = _compute_hash_of_file(p, p.stat().st_mtime)
+            for path in paths:
+                hash_ = _compute_hash_of_file(path, path.stat().st_mtime)
 
                 try:
-                    hash_in_db = Hash[id_, p.as_posix()]
+                    hash_in_db = Hash[id_, path.as_posix()]
                 except orm.ObjectNotFound:
-                    Hash(task=id_, dependency=dependency, hash_=hash_)
+                    Hash(task=id_, dependency=path.as_posix(), hash_=hash_)
                 else:
                     hash_in_db.hash = hash_
 
@@ -112,13 +112,13 @@ def save_hash_of_task_target(id_, dag):
     for path in ensure_list(dag.nodes[id_]["produces"]):
         paths = _path_to_file_or_directory_to_path_iterator(path)
 
-        for p in paths:
-            hash_ = _compute_hash_of_file(p, p.stat().st_mtime)
+        for path in paths:
+            hash_ = _compute_hash_of_file(path, path.stat().st_mtime)
 
             try:
-                hash_in_db = Hash[id_, p]
+                hash_in_db = Hash[id_, path.as_posix()]
             except orm.ObjectNotFound:
-                Hash(task=id_, dependency=p.as_posix(), hash_=hash_)
+                Hash(task=id_, dependency=path.as_posix(), hash_=hash_)
             else:
                 hash_in_db.hash = hash_
 
