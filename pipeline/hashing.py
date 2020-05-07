@@ -41,32 +41,27 @@ def compare_hashes_of_task(id_, env, dag, config):
     for node in dependencies_and_targets:
         path = Path(node)
 
-        if node in env.list_templates():
-            rendered_task = render_task_template(id_, dag.nodes[id_], env, config)
-            hash_ = _compute_hash_of_string(rendered_task)
+        if node in env.list_templates() or path.exists():
+            if node in env.list_templates():
+                rendered_task = render_task_template(id_, dag.nodes[id_], env, config)
+                hash_ = _compute_hash_of_string(rendered_task)
+                dependency = node
+
+            elif path.exists():
+                paths = _path_to_file_or_directory_to_path_iterator(path)
+
+                for path in paths:
+                    hash_ = _compute_hash_of_file(path, path.stat().st_mtime)
+                    dependency = path.as_posix()
 
             try:
-                hash_in_db = Hash[id_, node]
-                assert hash_ == hash_in_db.hash_
+                hash_in_db = Hash[id_, dependency]
             except orm.ObjectNotFound:
-                Hash(task=id_, dependency=node, hash_=hash_)
+                Hash(task=id_, dependency=dependency, hash_=hash_)
                 have_same_hashes = False
-            except AssertionError:
-                hash_in_db.hash_ = hash_
-                have_same_hashes = False
-
-        elif path.exists():
-            paths = _path_to_file_or_directory_to_path_iterator(path)
-
-            for path in paths:
-                hash_ = _compute_hash_of_file(path, path.stat().st_mtime)
-
+            else:
                 try:
-                    hash_in_db = Hash[path.as_posix(), node]
                     assert hash_ == hash_in_db.hash_
-                except orm.ObjectNotFound:
-                    Hash(task=id_, dependency=path.as_posix(), hash_=hash_)
-                    have_same_hashes = False
                 except AssertionError:
                     hash_in_db.hash_ = hash_
                     have_same_hashes = False
@@ -84,26 +79,14 @@ def save_hashes_of_task_dependencies(id_, env, dag, config):
         if dependency in env.list_templates():
             rendered_task = render_task_template(id_, dag.nodes[id_], env, config)
             hash_ = _compute_hash_of_string(rendered_task)
-
-            try:
-                hash_in_db = Hash[id_, dependency]
-            except orm.ObjectNotFound:
-                Hash(task=id_, dependency=dependency, hash_=hash_)
-            else:
-                hash_in_db.hash = hash_
+            create_or_update_hash(id_, dependency, hash_)
 
         else:
             paths = _path_to_file_or_directory_to_path_iterator(dependency)
 
             for path in paths:
                 hash_ = _compute_hash_of_file(path, path.stat().st_mtime)
-
-                try:
-                    hash_in_db = Hash[id_, path.as_posix()]
-                except orm.ObjectNotFound:
-                    Hash(task=id_, dependency=path.as_posix(), hash_=hash_)
-                else:
-                    hash_in_db.hash = hash_
+                create_or_update_hash(id_, path.as_posix(), hash_)
 
 
 @orm.db_session
@@ -114,13 +97,7 @@ def save_hash_of_task_target(id_, dag):
 
         for path in paths:
             hash_ = _compute_hash_of_file(path, path.stat().st_mtime)
-
-            try:
-                hash_in_db = Hash[id_, path.as_posix()]
-            except orm.ObjectNotFound:
-                Hash(task=id_, dependency=path.as_posix(), hash_=hash_)
-            else:
-                hash_in_db.hash = hash_
+            create_or_update_hash(id_, path.as_posix(), hash_)
 
 
 @functools.lru_cache()  # noqa: U101
@@ -172,3 +149,12 @@ def _path_to_file_or_directory_to_path_iterator(path):
         paths = [path]
 
     return paths
+
+
+def create_or_update_hash(first_key, second_key, hash_):
+    try:
+        hash_in_db = Hash[first_key, second_key]
+    except orm.ObjectNotFound:
+        Hash(task=first_key, dependency=second_key, hash_=hash_)
+    else:
+        hash_in_db.hash = hash_

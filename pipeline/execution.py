@@ -57,7 +57,7 @@ def execute_dag_serially(dag, env, config):
 
     padding = _compute_padding_to_prevent_task_description_from_moving(unfinished_tasks)
 
-    scheduler = Scheduler(dag, unfinished_tasks, config["priority"])
+    scheduler = Scheduler(dag, unfinished_tasks, config["priority_scheduling"])
 
     with tqdm(total=len(unfinished_tasks), bar_format=TQDM_BAR_FORMAT) as t:
         while scheduler.are_tasks_left:
@@ -85,7 +85,7 @@ def execute_dag_parallelly(dag, env, config):
 
     padding = _compute_padding_to_prevent_task_description_from_moving(unfinished_tasks)
 
-    scheduler = Scheduler(dag, unfinished_tasks, config["priority"])
+    scheduler = Scheduler(dag, unfinished_tasks, config["priority_scheduling"])
     submitted_tasks = {}
 
     with tqdm(
@@ -95,7 +95,7 @@ def execute_dag_parallelly(dag, env, config):
             # Add new tasks to the queue.
             n_proposals = (
                 n_jobs - sum(not task.done() for task in submitted_tasks.values())
-                if config["priority"]
+                if config["priority_scheduling"]
                 else -1
             )
             proposals = scheduler.propose(n_proposals)

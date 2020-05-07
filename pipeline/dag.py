@@ -186,7 +186,7 @@ def _assign_priority_to_nodes(dag, config):
     discount_factor = config["priority_discount_factor"]
     reversed_dag = dag.reverse()
     for id_ in nx.topological_sort(reversed_dag):
-        if reversed_dag.nodes[id_]["_is_task"] and config["priority"]:
+        if reversed_dag.nodes[id_]["_is_task"] and config["priority_scheduling"]:
             sum_priorities = 0
             for pre in reversed_dag.predecessors(id_):
                 for pre_task in reversed_dag.predecessors(pre):
@@ -227,7 +227,7 @@ def _draw_dag(dag, config):
     )
 
     task_nodes = [node for node in dag.nodes if dag.nodes[node]["_is_task"]]
-    if config["priority"]:
+    if config["priority_scheduling"]:
         node_size = np.array([dag.nodes[node]["priority"] for node in task_nodes])
         node_size_demeaned = node_size - node_size.min()
         node_size_relative = node_size_demeaned / node_size_demeaned.max()
@@ -245,7 +245,7 @@ def _draw_dag(dag, config):
         dag, pos=layout, nodelist=task_nodes, **priority_kwargs, ax=ax
     )
 
-    if config["priority"]:
+    if config["priority_scheduling"]:
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("right", size="3%", pad=0.1)
         fig.colorbar(im, cax=cax, orientation="vertical")
