@@ -2,9 +2,9 @@
 Templates
 =========
 
-**pipeline** comes with some pre-defined templates for common tasks in a scientific
-project. Check out the templates to see what options are available and what internal
-code is executed.
+pipeline comes with some pre-defined templates for common tasks in a scientific project.
+Check out the templates to see what options are available and what internal code is
+executed.
 
 Most templates come with a set of general parameters which work for all backends and
 template-specific parameters.

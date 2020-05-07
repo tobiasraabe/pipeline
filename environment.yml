@@ -27,7 +27,7 @@ dependencies:
   - rpy2
   - seaborn
   - sphinx
-  - sphinx_rtd_theme
+  - pydata-sphinx-theme
   - statsmodels
   - tqdm
   - pip:

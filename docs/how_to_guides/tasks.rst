@@ -8,7 +8,7 @@ Basics
 ------
 
 This section goes into the details of tasks. Tasks have to be defined by the user and
-are the essential building blocks of a workflow which can be executed with **pipeline**.
+are the essential building blocks of a workflow which can be executed with pipeline.
 
 Tasks are defined in a ``.yaml`` file which is a dictionary. The keys of the dictionary
 are the ids of the tasks and the values are dictionaries with more information on the
@@ -19,7 +19,7 @@ id, a template, and a target.
   placeholder names for the targets of the task.
 
 - The template defines what the task does. Templates can be any Python or R file either
-  given by the user or pre-defined by **pipeline**.
+  given by the user or pre-defined by pipeline.
 
 - The target yields a(multiple) path(s) to the output of the task.
 
@@ -43,8 +43,8 @@ path to the build directory for convenience. (For more information see
 Explicit / implicit target paths
 --------------------------------
 
-With **pipeline** you do not need to assign output paths to tasks. This might be handy
-in case you only need the aforementioned simulated data set for regressions and summary
+With pipeline you do not need to assign output paths to tasks. This might be handy in
+case you only need the aforementioned simulated data set for regressions and summary
 statistics, but you do not need to take a look at the file yourself.
 
 In this case, first, delete the ``produces`` key and its value. The task becomes
@@ -54,7 +54,7 @@ In this case, first, delete the ``produces`` key and its value. The task becomes
     simulated-data:
       template: simulate_data.py
 
-Secondly, we need to provide a way for **pipeline** to inject its auto-generated output
+Secondly, we need to provide a way for pipeline to inject its auto-generated output
 path. In the file ``simulate_data.py``, change the following call:
 
 .. code-block:: python
@@ -62,8 +62,8 @@ path. In the file ``simulate_data.py``, change the following call:
     df.to_csv("{{ build_directory }}/data/simulate_data.csv")  # original
     df.to_csv("{{ produces }}")  # new
 
-Now, **pipeline** will inject its own output path. But, how can you link following tasks
-to a task target whose exact location is unknown to you? Find out about it in the next
+Now, pipeline will inject its own output path. But, how can you link following tasks to
+a task target whose exact location is unknown to you? Find out about it in the next
 section.
 
 
@@ -98,7 +98,7 @@ Inside the ``ols.py`` template, use ``{{ depends_on }}`` to inject the path.
 Multiple dependencies and outputs
 ---------------------------------
 
-**pipeline**'s magic currently only works with single inputs and outputs of tasks. This
+pipeline's magic currently only works with single inputs and outputs of tasks. This
 pattern is desirable because the workflow becomes a collection of atomic tasks which is
 better for parallelization and the redundancy of some code pieces becomes clear. The
 repetitive tasks could be replaced by a single template.
@@ -201,6 +201,23 @@ Task priorities
 Tasks can have a priority such that their execution is preferred or deferred compared to
 other tasks. Use ``priority`` in the task definition to set a task priority. For a more
 comprehensive introduction, see :doc:`task-priorities`.
+
+
+Run always
+----------
+
+Normally, you let pipeline handle whether a task should be executed depending on whether
+inputs or the output of the task has changed. In other cases, the task might handle this
+on its own. For example, you have a script which checks whether new data can be
+downloaded. This task needs to be always executed. For that, you can add ``run_always``
+to the task dictionary like in the following example.
+
+.. code-block:: yaml
+
+    task:
+      template: task-template.py
+      produces: {{ build_directory }}/task-data.dat
+      run_always: true
 
 
 Forbidden Keys

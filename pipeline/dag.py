@@ -159,8 +159,8 @@ def _create_dag_dict(tasks):
         dag_dict[id_] = depends_on
 
         # If the task produces anything, register the output as a node.
-        if "produces" in task_info:
-            dag_dict[task_info["produces"]] = [id_]
+        for target in ensure_list(task_info.get("produces", [])):
+            dag_dict[target] = [id_]
 
     return dag_dict
 

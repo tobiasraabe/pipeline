@@ -33,14 +33,17 @@ requirements:
     - pony
     - pydot
     - pyyaml
-    - pydot
     - statsmodels
     - tqdm
 
 test:
+  requires:
+      - pytest
   source_files:
     - tox.ini
+    - pipeline/tests
   commands:
+    - pytest
     - pipeline --version
     - pipeline --help
 
