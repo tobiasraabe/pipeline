@@ -108,7 +108,7 @@ def test_discard_non_task_yamls(test_project_config):
 
 
 @pytest.mark.unit
-def test_python_comments_within_jinja2_templates(test_project_config):
+def test_comments_within_task_specifications(test_project_config):
     config = load_config(config=test_project_config)
 
     source_directory = Path(config["source_directory"])
@@ -124,6 +124,9 @@ def test_python_comments_within_jinja2_templates(test_project_config):
 
         task-3:
           template: t.py
+
+        # task-4:
+        #   template: {{ undefined_variable }}
         """
     )
     source_directory.joinpath("tasks.yaml").write_text(task_specification)

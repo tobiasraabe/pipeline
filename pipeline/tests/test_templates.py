@@ -85,3 +85,16 @@ def test_globals_in_templates(test_project_config):
         config["globals"]["a"]
         == Path(config["hidden_build_directory"], "task").read_text()
     )
+
+
+@pytest.mark.unit
+def test_jinja2_variables_can_be_commented_out_with_normal_comments():
+    env, _ = collect_templates([])
+
+    task = textwrap.dedent(
+        """
+        # {{ lkajskdjs }}
+        """
+    )
+    template = env.from_string(task)
+    assert "\n\n" == template.render()
