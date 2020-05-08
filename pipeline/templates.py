@@ -1,8 +1,10 @@
+import numbers
 import os
 from pathlib import Path
+
 import jinja2
+
 from pipeline.shared import ensure_list
-import numbers
 
 
 def collect_templates(custom_templates, tasks=None):

@@ -1,13 +1,15 @@
-from pipeline.templates import collect_templates
 import os
 import textwrap
-from click.testing import CliRunner
-import yaml
-from pipeline.config import load_config
-from pipeline.cli import cli
 from pathlib import Path
+
 import pytest
+import yaml
+from click.testing import CliRunner
+
+from pipeline.cli import cli
+from pipeline.config import load_config
 from pipeline.tasks import _collect_user_defined_tasks
+from pipeline.templates import collect_templates
 
 
 @pytest.mark.end_to_end
