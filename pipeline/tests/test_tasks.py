@@ -105,3 +105,31 @@ def test_discard_non_task_yamls(test_project_config):
 
     result["task-1"].pop("config")
     assert result == {"task-1": {"template": "task.py"}}
+
+
+@pytest.mark.unit
+def test_python_comments_within_jinja2_templates(test_project_config):
+    config = load_config(config=test_project_config)
+
+    source_directory = Path(config["source_directory"])
+    source_directory.mkdir()
+
+    task_specification = textwrap.dedent(
+        """
+        task-1:
+          template: t.py
+
+        # task-2:
+        #   template: t.py
+
+        task-3:
+          template: t.py
+        """
+    )
+    source_directory.joinpath("tasks.yaml").write_text(task_specification)
+
+    result = _collect_user_defined_tasks(config)
+    result["task-1"].pop("config")
+    result["task-3"].pop("config")
+
+    assert result == {"task-1": {"template": "t.py"}, "task-3": {"template": "t.py"}}
