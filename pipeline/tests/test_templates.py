@@ -7,6 +7,7 @@ from pipeline.config import load_config
 from pipeline.cli import cli
 from pathlib import Path
 import pytest
+from pipeline.tasks import _collect_user_defined_tasks
 
 
 @pytest.mark.end_to_end
@@ -69,7 +70,7 @@ def test_globals_in_templates(test_project_config):
     task = """
     from pathlib import Path
 
-    Path("{{ produces }}").write_text("{{ globals ['a'] }}")
+    Path("{{ produces }}").write_text("{{ globals['a'] }}")
     """
     Path(config["source_directory"], "task.py").write_text(textwrap.dedent(task))
 
@@ -83,3 +84,30 @@ def test_globals_in_templates(test_project_config):
         config["globals"]["a"]
         == Path(config["hidden_build_directory"], "task").read_text()
     )
+
+
+def test_python_comments_within_jinja2_templates(test_project_config):
+    config = load_config(config=test_project_config)
+
+    source_directory = Path(config["source_directory"])
+    source_directory.mkdir()
+
+    task_specification = textwrap.dedent(
+        """
+        task-1:
+          template: t.py
+
+        # task-2:
+        #   template: t.py
+
+        task-3:
+          template: t.py
+        """
+    )
+    source_directory.joinpath("tasks.yaml").write_text(task_specification)
+
+    result = _collect_user_defined_tasks(config)
+    result["task-1"].pop("config")
+    result["task-3"].pop("config")
+
+    assert result == {"task-1": {"template": "t.py"}, "task-3": {"template": "t.py"}}

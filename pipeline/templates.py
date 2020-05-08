@@ -24,6 +24,8 @@ def collect_templates(custom_templates, tasks=None):
             [task_templates, custom_templates, internal_templates]
         ),
         undefined=jinja2.StrictUndefined,
+        keep_trailing_newline=True,
+        line_comment_prefix="#",
     )
 
     # Register some Python functions which can be used in the templates. Must be

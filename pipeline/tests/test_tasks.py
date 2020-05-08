@@ -15,8 +15,7 @@ from pipeline.tasks import process_tasks
 @pytest.mark.end_to_end
 def test_duplicated_task_ids_in_the_same_file(test_project_config):
     """Test whether a duplicated task in the same file raises an error."""
-    config = test_project_config
-    config = load_config(config=config)
+    config = load_config(config=test_project_config)
 
     source_directory = Path(config["source_directory"])
     source_directory.mkdir()
