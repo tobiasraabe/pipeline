@@ -185,8 +185,10 @@ regression. Later, you want to collect the regressions and make a regression tab
 Coding the same list of dependent variables two times may lead to errors and unnecessary
 duplication.
 
-To overcome this issue, use :ref:`global variables inside the project configuration
-<configuration_globals>`. It is a dictionary and maybe used like this:
+By default, every variable defined in ``.pipeline.yaml`` is available while rendering
+task specifications and tasks. See :ref:`global variables inside the project
+configuration <configuration_globals>` for more. To avoid name collisions, you should
+create nested structures like a ``globals`` dictionary.
 
 .. code-block:: jinja
 
