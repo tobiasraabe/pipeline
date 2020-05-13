@@ -30,7 +30,7 @@ requirements:
     - matplotlib
     - networkx
     - pandas >=0.0.24
-    - pony
+    - pony >=0.7.13
     - pydot
     - pyyaml
     - statsmodels
