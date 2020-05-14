@@ -153,7 +153,7 @@ def _create_dag_dict(tasks):
     for id_, task_info in tasks.items():
         # Add the task to the graph as a node.
         depends_on = ensure_list(task_info.get("depends_on", [])).copy()
-        depends_on.extend(ensure_list(task_info.get("template", [])))
+        depends_on.extend(ensure_list(task_info["template"]))
 
         dag_dict[id_] = depends_on
 
