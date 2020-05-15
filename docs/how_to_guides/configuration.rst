@@ -82,9 +82,10 @@ At last, insert the path to this template in ``custom_templates`` and your
 Global variables
 ----------------
 
-It is possible to create global variables within the configuration which can be used
-across tasks and templates. Simply use the ``globals`` key inside the ``.pipeline.yaml``
-and define a dictionary of named variables.
+Every variable defined inside the ``.pipeline.yaml`` is passed to render task
+specifications or task templates and, thus, acts like a global variable. To avoid name
+collisions, you can use more nested structures like a ``global`` dictionary inside the
+task specification.
 
 .. code-block:: yaml
 
@@ -97,4 +98,4 @@ If you want to know how to use them inside tasks and templates, see
 :ref:`tasks_global_variables_in_tasks_and_templates`.
 
 Note that a :ref:`custom variable <tasks_custom_variables>` called ``globals`` in the
-tasks templates has precedence.
+tasks templates creates a name collision.

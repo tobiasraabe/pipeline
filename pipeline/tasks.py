@@ -48,16 +48,28 @@ def _collect_user_defined_tasks(config):
 
         tasks_in_file = read_yaml(rendered_template)
 
-        if tasks_in_file:
+        if isinstance(tasks_in_file, dict) and tasks_in_file:
             # Add config location to task_info.
-            for id_ in tasks_in_file:
-                tasks_in_file[id_]["config"] = path.as_posix()
+            found_tasks_in_file = {}
+            for id_, task_info in tasks_in_file.items():
+                if "template" in task_info:
+                    overlapping_keys = set(config) & set(task_info)
+                    if overlapping_keys:
+                        raise TypeError(
+                            f"Task '{id_}' received arguments '{overlapping_keys}' "
+                            "which are defined in loaded '.pipeline.yaml' and the task "
+                            "specification. Rename one side of the definitions to "
+                            "resolve the issue."
+                        )
 
-            duplicated_ids = set(tasks_in_file) & set(tasks)
+                    found_tasks_in_file[id_] = task_info
+                    found_tasks_in_file[id_]["config"] = path.as_posix()
+
+            duplicated_ids = set(found_tasks_in_file) & set(tasks)
             if duplicated_ids:
                 raise DuplicatedTaskError(duplicated_ids)
 
-            tasks.update(tasks_in_file)
+            tasks.update(found_tasks_in_file)
 
     return tasks
 

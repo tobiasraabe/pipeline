@@ -10,10 +10,10 @@ Basics
 This section goes into the details of tasks. Tasks have to be defined by the user and
 are the essential building blocks of a workflow which can be executed with pipeline.
 
-Tasks are defined in a ``.yaml`` file which is a dictionary. The keys of the dictionary
-are the ids of the tasks and the values are dictionaries with more information on the
-specific task. Each task dictionary consists of at least three explicit attributes, an
-id, a template, and a target.
+Tasks are defined in a ``.yaml`` file (not in ``.yml`` which is a dictionary. The keys
+of the dictionary are the ids of the tasks and the values are dictionaries with more
+information on the specific task. Each task dictionary consists of at least three
+explicit attributes, an id, a template, and a target.
 
 - The unique id allows to identify the task among others and automatically generate
   placeholder names for the targets of the task.
@@ -185,8 +185,10 @@ regression. Later, you want to collect the regressions and make a regression tab
 Coding the same list of dependent variables two times may lead to errors and unnecessary
 duplication.
 
-To overcome this issue, use :ref:`global variables inside the project configuration
-<configuration_globals>`. It is a dictionary and maybe used like this:
+By default, every variable defined in ``.pipeline.yaml`` is available while rendering
+task specifications and tasks. See :ref:`global variables inside the project
+configuration <configuration_globals>` for more. To avoid name collisions, you should
+create nested structures like a ``globals`` dictionary.
 
 .. code-block:: jinja
 

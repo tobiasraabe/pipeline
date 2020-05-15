@@ -1,12 +1,14 @@
-from pipeline.templates import collect_templates
 import os
 import textwrap
-from click.testing import CliRunner
-import yaml
-from pipeline.config import load_config
-from pipeline.cli import cli
 from pathlib import Path
+
 import pytest
+import yaml
+from click.testing import CliRunner
+
+from pipeline.cli import cli
+from pipeline.config import load_config
+from pipeline.templates import collect_templates
 
 
 @pytest.mark.end_to_end
@@ -69,7 +71,7 @@ def test_globals_in_templates(test_project_config):
     task = """
     from pathlib import Path
 
-    Path("{{ produces }}").write_text("{{ globals ['a'] }}")
+    Path("{{ produces }}").write_text("{{ globals['a'] }}")
     """
     Path(config["source_directory"], "task.py").write_text(textwrap.dedent(task))
 
@@ -83,3 +85,16 @@ def test_globals_in_templates(test_project_config):
         config["globals"]["a"]
         == Path(config["hidden_build_directory"], "task").read_text()
     )
+
+
+@pytest.mark.unit
+def test_jinja2_variables_can_be_commented_out_with_normal_comments():
+    env, _ = collect_templates([])
+
+    task = textwrap.dedent(
+        """
+        # {{ lkajskdjs }}
+        """
+    )
+    template = env.from_string(task)
+    assert "\n\n" == template.render()

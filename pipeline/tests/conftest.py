@@ -16,4 +16,4 @@ def test_project_config(tmp_path_factory):
 
     project_path.joinpath(".pipeline.yaml").write_text(yaml.dump(config))
 
-    yield config
+    return config
