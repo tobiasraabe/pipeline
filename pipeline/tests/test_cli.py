@@ -161,7 +161,6 @@ def test_priority_scheduling(test_project_config):
     assert result.exit_code == 0
 
     list_ = yaml.safe_load(project_directory.joinpath("bld", "out.yaml").read_text())
-    assert list_ != list("abcd")
 
     result = runner.invoke(cli, ["clean"])
     result = runner.invoke(cli, ["build", "--priority"])
