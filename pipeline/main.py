@@ -1,4 +1,5 @@
 from pipeline.dag import create_dag
+from pipeline.database import create_database
 from pipeline.execution import execute_dag_parallelly
 from pipeline.execution import execute_dag_serially
 from pipeline.tasks import process_tasks
@@ -7,6 +8,8 @@ from pipeline.templates import collect_templates
 
 
 def build_project(config):
+    create_database(config)
+
     tasks = process_tasks(config)
     env, missing_templates = collect_templates(config["custom_templates"], tasks)
     tasks = replace_missing_templates_with_correct_paths(tasks, missing_templates)

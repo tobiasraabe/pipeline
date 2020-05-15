@@ -9,8 +9,8 @@ from pipeline.exceptions import DuplicatedTaskError
 
 def process_tasks(config):
     user_defined_tasks = _collect_user_defined_tasks(config)
-    tasks = _process_user_defined_tasks(user_defined_tasks, config)
-    tasks = _replace_task_dependency_with_task_output(tasks)
+    tasks = _add_default_output_path(user_defined_tasks, config)
+    tasks = _replace_task_dependencies_with_task_outputs(tasks)
 
     return tasks
 
@@ -62,7 +62,7 @@ def _collect_user_defined_tasks(config):
     return tasks
 
 
-def _process_user_defined_tasks(user_defined_tasks, config):
+def _add_default_output_path(user_defined_tasks, config):
     user_defined_tasks = copy.deepcopy(user_defined_tasks)
 
     generated_tasks = {}
@@ -75,7 +75,13 @@ def _process_user_defined_tasks(user_defined_tasks, config):
     return generated_tasks
 
 
-def _replace_task_dependency_with_task_output(tasks):
+def _replace_task_dependencies_with_task_outputs(tasks):
+    """Replace a task dependency with the output of the task.
+
+    Since users are allowed to reference tasks as dependencies, we need to replace tasks
+    with the outputs of the task to form the workflow.
+
+    """
     for task_info in tasks.values():
         depends_on = task_info.get("depends_on", [])
         if isinstance(depends_on, list):

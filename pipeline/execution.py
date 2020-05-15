@@ -57,7 +57,7 @@ def execute_dag_serially(dag, env, config):
 
     padding = _compute_padding_to_prevent_task_description_from_moving(unfinished_tasks)
 
-    scheduler = Scheduler(dag, unfinished_tasks, config["priority"])
+    scheduler = Scheduler(dag, unfinished_tasks, config["priority_scheduling"])
 
     with tqdm(total=len(unfinished_tasks), bar_format=TQDM_BAR_FORMAT) as t:
         while scheduler.are_tasks_left:
@@ -71,7 +71,7 @@ def execute_dag_serially(dag, env, config):
 
             _ = _execute_task(id_, path, config)
 
-            _process_task_target(id_, dag, config)
+            _process_task_targets(id_, dag)
 
             scheduler.process_finished(id_)
 
@@ -85,7 +85,7 @@ def execute_dag_parallelly(dag, env, config):
 
     padding = _compute_padding_to_prevent_task_description_from_moving(unfinished_tasks)
 
-    scheduler = Scheduler(dag, unfinished_tasks, config["priority"])
+    scheduler = Scheduler(dag, unfinished_tasks, config["priority_scheduling"])
     submitted_tasks = {}
 
     with tqdm(
@@ -95,7 +95,7 @@ def execute_dag_parallelly(dag, env, config):
             # Add new tasks to the queue.
             n_proposals = (
                 n_jobs - sum(not task.done() for task in submitted_tasks.values())
-                if config["priority"]
+                if config["priority_scheduling"]
                 else -1
             )
             proposals = scheduler.propose(n_proposals)
@@ -126,7 +126,7 @@ def execute_dag_parallelly(dag, env, config):
                 raise TaskError("\n\n".join(exceptions))
 
             for id_ in newly_finished_tasks:
-                _process_task_target(id_, dag, config)
+                _process_task_targets(id_, dag)
                 del submitted_tasks[id_]
 
             scheduler.process_finished(newly_finished_tasks)
@@ -258,8 +258,13 @@ def _format_exception_message(id_, path, e):
     return f"\n\nTask '{id_}' in file '{path}' failed.\n\n{exc_info}"
 
 
-def _process_task_target(id_, dag, config):
+def _process_task_targets(id_, dag):
     """Process the target of the task."""
+    _check_missing_targets(id_, dag)
+    save_hash_of_task_target(id_, dag)
+
+
+def _check_missing_targets(id_, dag):
     targets = ensure_list(dag.nodes[id_]["produces"])
     missing_targets = [
         Path(target).as_posix() for target in targets if not Path(target).exists()
@@ -268,7 +273,8 @@ def _process_task_target(id_, dag, config):
         raise FileNotFoundError(
             f"Target(s) {missing_targets} was(were) not produced by task '{id_}'."
         )
-    save_hash_of_task_target(id_, dag, config)
+
+    save_hash_of_task_target(id_, dag)
 
 
 def _patch_subprocess_environment(config):
