@@ -160,4 +160,4 @@ flags also overwrite behavior defined in ``.pipeline.yaml`` with
 
     # .pipeline.yaml
 
-    priority: true
+    priority_scheduling: true

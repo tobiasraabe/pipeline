@@ -33,7 +33,9 @@ def load_config(debug=None, n_jobs=None, priority=None, config=None):
 
     config["_is_debug"] = debug if debug is not None else False
 
-    config["priority"] = config.get("priority", False) if priority is None else priority
+    config["priority_scheduling"] = (
+        config.get("priority_scheduling", False) if priority is None else priority
+    )
 
     config["priority_discount_factor"] = config.get("priority_discount_factor", 0)
 
@@ -43,6 +45,16 @@ def load_config(debug=None, n_jobs=None, priority=None, config=None):
     else:
         # The command-line input has precedence over the value in the config file.
         config["n_jobs"] = n_jobs if n_jobs is not None else config.get("n_jobs", 1)
+
+    Path(config["hidden_build_directory"]).mkdir(parents=True, exist_ok=True)
+    config["db"] = config.get(
+        "db",
+        {
+            "provider": "sqlite",
+            "filename": config["hidden_build_directory"] + "/db.sql",
+            "create_db": True,
+        },
+    )
 
     return config
 
